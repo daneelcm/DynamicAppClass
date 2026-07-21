@@ -4,7 +4,8 @@ using DynamicAppClass.Domain.Entities;
 
 namespace DynamicAppClass.Application.Services;
 
-public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClassInstanceRepository classInstances)
+public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClassInstanceRepository classInstances,
+    IClassFieldRepository classFields, IClassStatusRepository classStatuses, IClassActionRepository classActions)
 {
     public async Task<IReadOnlyList<ClassTypeSummaryDto>> ListClassTypesAsync(CancellationToken cancellationToken)
     {
@@ -32,7 +33,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         ValidateText(request.Name, "Field name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
         ValidateConcurrencyToken(classType.ConcurrencyToken, request.ConcurrencyToken);
-        classType.AddField(new ClassField
+        await classFields.AddAsync(new ClassField
         {
             ClassTypeId = classTypeId,
             Name = request.Name.Trim(),
@@ -40,8 +41,8 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
             IsRequired = request.IsRequired,
             SortOrder = request.SortOrder,
             OptionsCsv = request.Options is { Count: > 0 } ? string.Join("|", request.Options.Select(option => option.Trim()).Where(option => option.Length > 0)) : null
-        });
-        await classTypes.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+        await classFields.SaveChangesAsync(cancellationToken);
         return MapDetail(classType);
     }
 
@@ -50,8 +51,8 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         ValidateText(request.Name, "Status name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
         ValidateConcurrencyToken(classType.ConcurrencyToken, request.ConcurrencyToken);
-        classType.AddStatus(new ClassStatus { ClassTypeId = classTypeId, Name = request.Name.Trim(), SortOrder = request.SortOrder });
-        await classTypes.SaveChangesAsync(cancellationToken);
+        await classStatuses.AddAsync(new ClassStatus { ClassTypeId = classTypeId, Name = request.Name.Trim(), SortOrder = request.SortOrder }, cancellationToken);
+        await classStatuses.SaveChangesAsync(cancellationToken);
         return MapDetail(classType);
     }
 
@@ -60,8 +61,8 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         ValidateText(request.Name, "Action name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
         ValidateConcurrencyToken(classType.ConcurrencyToken, request.ConcurrencyToken);
-        classType.AddAction(new ClassAction { ClassTypeId = classTypeId, Name = request.Name.Trim(), FromStatusId = request.FromStatusId, ToStatusId = request.ToStatusId });
-        await classTypes.SaveChangesAsync(cancellationToken);
+        await classActions.AddAsync(new ClassAction { ClassTypeId = classTypeId, Name = request.Name.Trim(), FromStatusId = request.FromStatusId, ToStatusId = request.ToStatusId }, cancellationToken);
+        await classActions.SaveChangesAsync(cancellationToken);
         return MapDetail(classType);
     }
 

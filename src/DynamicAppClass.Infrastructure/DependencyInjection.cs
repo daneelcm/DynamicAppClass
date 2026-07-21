@@ -14,6 +14,9 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection") ?? "Data Source=dynamic-app-class.db";
         services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
         services.AddScoped<IClassTypeRepository, ClassTypeRepository>();
+        services.AddScoped<IClassFieldRepository, ClassFieldRepository>();
+        services.AddScoped<IClassStatusRepository, ClassStatusRepository>();
+        services.AddScoped<IClassActionRepository, ClassActionRepository>();
         services.AddScoped<IClassInstanceRepository, ClassInstanceRepository>();
         return services;
     }
