@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DynamicAppClass.Api/DynamicAppClass.Api.csproj" />
+    <Project Path="src/DynamicAppClass.Application/DynamicAppClass.Application.csproj" />
+    <Project Path="src/DynamicAppClass.Domain/DynamicAppClass.Domain.csproj" />
+    <Project Path="src/DynamicAppClass.Infrastructure/DynamicAppClass.Infrastructure.csproj" />
+  </Folder>
+</Solution>
