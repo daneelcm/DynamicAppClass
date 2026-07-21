@@ -1,9 +1,8 @@
 namespace DynamicAppClass.Domain.Entities;
 
-public sealed class ClassInstanceFieldValue
+public sealed class ClassInstanceFieldValue : BaseEntity
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid ClassInstanceId { get; set; }
-    public Guid ClassFieldId { get; set; }
+    public int ClassInstanceId { get; set; }
+    public int ClassFieldId { get; set; }
     public string? Value { get; set; }
 }

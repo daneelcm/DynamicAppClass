@@ -35,10 +35,10 @@ public static class SeedData
 
         supportTicket.Actions.AddRange(
         [
-            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Start Work", FromStatusId = newStatus.Id, ToStatusId = inProgressStatus.Id },
-            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Resolve", FromStatusId = inProgressStatus.Id, ToStatusId = resolvedStatus.Id },
-            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Close", FromStatusId = resolvedStatus.Id, ToStatusId = closedStatus.Id },
-            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Reopen", FromStatusId = resolvedStatus.Id, ToStatusId = inProgressStatus.Id }
+            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Start Work", FromStatus = newStatus, ToStatus = inProgressStatus },
+            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Resolve", FromStatus = inProgressStatus, ToStatus = resolvedStatus },
+            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Close", FromStatus = resolvedStatus, ToStatus = closedStatus },
+            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Reopen", FromStatus = resolvedStatus, ToStatus = inProgressStatus }
         ]);
 
         var instance = new ClassInstance

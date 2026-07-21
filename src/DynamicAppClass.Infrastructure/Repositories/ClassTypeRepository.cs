@@ -13,7 +13,7 @@ public sealed class ClassTypeRepository(AppDbContext dbContext) : IClassTypeRepo
             .OrderBy(classType => classType.Name)
             .ToListAsync(cancellationToken);
 
-    public async Task<ClassType?> GetAsync(Guid id, CancellationToken cancellationToken) =>
+    public async Task<ClassType?> GetAsync(int id, CancellationToken cancellationToken) =>
         await IncludeGraph(dbContext.ClassTypes).SingleOrDefaultAsync(classType => classType.Id == id, cancellationToken);
 
     public async Task AddAsync(ClassType classType, CancellationToken cancellationToken) =>

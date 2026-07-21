@@ -13,7 +13,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return results.Select(MapSummary).ToList();
     }
 
-    public async Task<ClassTypeDetailDto> GetClassTypeAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ClassTypeDetailDto> GetClassTypeAsync(int id, CancellationToken cancellationToken)
     {
         var classType = await RequireClassType(id, cancellationToken);
         return MapDetail(classType);
@@ -28,7 +28,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return MapDetail(classType);
     }
 
-    public async Task<ClassTypeDetailDto> AddFieldAsync(Guid classTypeId, AddFieldRequest request, CancellationToken cancellationToken)
+    public async Task<ClassTypeDetailDto> AddFieldAsync(int classTypeId, AddFieldRequest request, CancellationToken cancellationToken)
     {
         ValidateText(request.Name, "Field name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
@@ -46,7 +46,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return MapDetail(classType);
     }
 
-    public async Task<ClassTypeDetailDto> AddStatusAsync(Guid classTypeId, AddStatusRequest request, CancellationToken cancellationToken)
+    public async Task<ClassTypeDetailDto> AddStatusAsync(int classTypeId, AddStatusRequest request, CancellationToken cancellationToken)
     {
         ValidateText(request.Name, "Status name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
@@ -56,7 +56,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return MapDetail(classType);
     }
 
-    public async Task<ClassTypeDetailDto> AddActionAsync(Guid classTypeId, AddActionRequest request, CancellationToken cancellationToken)
+    public async Task<ClassTypeDetailDto> AddActionAsync(int classTypeId, AddActionRequest request, CancellationToken cancellationToken)
     {
         ValidateText(request.Name, "Action name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
@@ -73,7 +73,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return instances.Select(instance => MapInstanceSummary(instance, types.Single(type => type.Id == instance.ClassTypeId))).ToList();
     }
 
-    public async Task<ClassInstanceDetailDto> GetInstanceAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ClassInstanceDetailDto> GetInstanceAsync(int id, CancellationToken cancellationToken)
     {
         var instance = await RequireInstance(id, cancellationToken);
         var classType = await RequireClassType(instance.ClassTypeId, cancellationToken);
@@ -103,7 +103,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return MapInstanceDetail(instance, classType);
     }
 
-    public async Task<ClassInstanceDetailDto> UpdateFieldValuesAsync(Guid instanceId, UpdateClassInstanceValuesRequest request, CancellationToken cancellationToken)
+    public async Task<ClassInstanceDetailDto> UpdateFieldValuesAsync(int instanceId, UpdateClassInstanceValuesRequest request, CancellationToken cancellationToken)
     {
         var instance = await RequireInstance(instanceId, cancellationToken);
         var classType = await RequireClassType(instance.ClassTypeId, cancellationToken);
@@ -130,14 +130,14 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return MapInstanceDetail(instance, classType);
     }
 
-    public async Task<IReadOnlyList<ClassActionDto>> GetAvailableActionsAsync(Guid instanceId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ClassActionDto>> GetAvailableActionsAsync(int instanceId, CancellationToken cancellationToken)
     {
         var instance = await RequireInstance(instanceId, cancellationToken);
         var classType = await RequireClassType(instance.ClassTypeId, cancellationToken);
         return instance.GetAvailableActions(classType).Select(action => MapAction(action, classType)).ToList();
     }
 
-    public async Task<ClassInstanceDetailDto> ExecuteActionAsync(Guid instanceId, ExecuteActionRequest request, CancellationToken cancellationToken)
+    public async Task<ClassInstanceDetailDto> ExecuteActionAsync(int instanceId, ExecuteActionRequest request, CancellationToken cancellationToken)
     {
         var instance = await RequireInstance(instanceId, cancellationToken);
         var classType = await RequireClassType(instance.ClassTypeId, cancellationToken);
@@ -147,10 +147,10 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return MapInstanceDetail(instance, classType);
     }
 
-    private async Task<ClassType> RequireClassType(Guid id, CancellationToken cancellationToken) =>
+    private async Task<ClassType> RequireClassType(int id, CancellationToken cancellationToken) =>
         await classTypes.GetAsync(id, cancellationToken) ?? throw new KeyNotFoundException("Class type was not found.");
 
-    private async Task<ClassInstance> RequireInstance(Guid id, CancellationToken cancellationToken) =>
+    private async Task<ClassInstance> RequireInstance(int id, CancellationToken cancellationToken) =>
         await classInstances.GetAsync(id, cancellationToken) ?? throw new KeyNotFoundException("Class instance was not found.");
 
     private static void ValidateConcurrencyToken(Guid current, Guid provided)
@@ -161,7 +161,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         }
     }
 
-    private static void ValidateFieldValues(ClassType classType, IReadOnlyDictionary<Guid, string?> values)
+    private static void ValidateFieldValues(ClassType classType, IReadOnlyDictionary<int, string?> values)
     {
         var fieldIds = classType.Fields.Select(field => field.Id).ToHashSet();
         if (values.Keys.Any(fieldId => !fieldIds.Contains(fieldId)))
@@ -178,7 +178,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         }
     }
 
-    private static string GetTitleFromFields(ClassType classType, IReadOnlyDictionary<Guid, string?> values)
+    private static string GetTitleFromFields(ClassType classType, IReadOnlyDictionary<int, string?> values)
     {
         var titleField = classType.Fields.FirstOrDefault(field => field.Name.Equals("Title", StringComparison.OrdinalIgnoreCase))
             ?? classType.Fields.OrderBy(field => field.SortOrder).FirstOrDefault();

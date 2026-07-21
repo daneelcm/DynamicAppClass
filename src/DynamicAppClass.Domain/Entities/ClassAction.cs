@@ -1,11 +1,13 @@
 namespace DynamicAppClass.Domain.Entities;
 
-public sealed class ClassAction
+public sealed class ClassAction : BaseEntity
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid ClassTypeId { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public Guid FromStatusId { get; set; }
-    public Guid ToStatusId { get; set; }
+    public int ClassTypeId { get; set; }
+    public required string Name { get; set; }
+    public int FromStatusId { get; set; }
+    public int ToStatusId { get; set; }
+
+    public ClassStatus FromStatus { get; set; }
+    public ClassStatus ToStatus { get; set; }
     public WorkflowTransition Transition => new(Id, FromStatusId, ToStatusId);
 }

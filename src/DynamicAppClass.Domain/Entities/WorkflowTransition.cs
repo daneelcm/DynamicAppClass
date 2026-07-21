@@ -1,3 +1,3 @@
 namespace DynamicAppClass.Domain.Entities;
 
-public sealed record WorkflowTransition(Guid ActionId, Guid FromStatusId, Guid ToStatusId);
+public sealed record WorkflowTransition(int ActionId, int FromStatusId, int ToStatusId);

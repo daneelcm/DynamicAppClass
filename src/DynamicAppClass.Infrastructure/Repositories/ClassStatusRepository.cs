@@ -13,7 +13,7 @@ public sealed class ClassStatusRepository(AppDbContext dbContext) : IClassStatus
             .OrderBy(classStatus => classStatus.Name)
             .ToListAsync(cancellationToken);
 
-    public async Task<ClassStatus?> GetAsync(Guid id, CancellationToken cancellationToken) =>
+    public async Task<ClassStatus?> GetAsync(int id, CancellationToken cancellationToken) =>
         await dbContext.ClassStatuses.SingleOrDefaultAsync(classStatus => classStatus.Id == id, cancellationToken);
 
     public async Task AddAsync(ClassStatus classStatus, CancellationToken cancellationToken) =>

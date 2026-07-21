@@ -13,7 +13,7 @@ public sealed class ClassActionRepository(AppDbContext dbContext) : IClassAction
             .OrderBy(classAction => classAction.Name)
             .ToListAsync(cancellationToken);
 
-    public async Task<ClassAction?> GetAsync(Guid id, CancellationToken cancellationToken) =>
+    public async Task<ClassAction?> GetAsync(int id, CancellationToken cancellationToken) =>
         await IncludeGraph(dbContext.ClassActions).SingleOrDefaultAsync(classAction => classAction.Id == id, cancellationToken);
 
     public async Task AddAsync(ClassAction classAction, CancellationToken cancellationToken) =>

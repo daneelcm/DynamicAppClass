@@ -13,7 +13,7 @@ public sealed class ClassFieldRepository(AppDbContext dbContext) : IClassFieldRe
             .OrderBy(classField => classField.Name)
             .ToListAsync(cancellationToken);
 
-    public async Task<ClassField?> GetAsync(Guid id, CancellationToken cancellationToken) =>
+    public async Task<ClassField?> GetAsync(int id, CancellationToken cancellationToken) =>
         await dbContext.ClassFields.SingleOrDefaultAsync(classField => classField.Id == id, cancellationToken);
 
     public async Task AddAsync(ClassField classField, CancellationToken cancellationToken) =>

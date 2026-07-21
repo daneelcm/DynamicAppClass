@@ -12,8 +12,8 @@ public sealed class ClassTypesController(ClassWorkflowService workflowService) :
     public async Task<ActionResult<IReadOnlyList<ClassTypeSummaryDto>>> List(CancellationToken cancellationToken) =>
         Ok(await workflowService.ListClassTypesAsync(cancellationToken));
 
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<ClassTypeDetailDto>> Get(Guid id, CancellationToken cancellationToken) =>
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<ClassTypeDetailDto>> Get(int id, CancellationToken cancellationToken) =>
         Ok(await workflowService.GetClassTypeAsync(id, cancellationToken));
 
     [HttpPost]
@@ -23,15 +23,15 @@ public sealed class ClassTypesController(ClassWorkflowService workflowService) :
         return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
-    [HttpPost("{id:guid}/fields")]
-    public async Task<ActionResult<ClassTypeDetailDto>> AddField(Guid id, AddFieldRequest request, CancellationToken cancellationToken) =>
+    [HttpPost("{id:int}/fields")]
+    public async Task<ActionResult<ClassTypeDetailDto>> AddField(int id, AddFieldRequest request, CancellationToken cancellationToken) =>
         Ok(await workflowService.AddFieldAsync(id, request, cancellationToken));
 
-    [HttpPost("{id:guid}/statuses")]
-    public async Task<ActionResult<ClassTypeDetailDto>> AddStatus(Guid id, AddStatusRequest request, CancellationToken cancellationToken) =>
+    [HttpPost("{id:int}/statuses")]
+    public async Task<ActionResult<ClassTypeDetailDto>> AddStatus(int id, AddStatusRequest request, CancellationToken cancellationToken) =>
         Ok(await workflowService.AddStatusAsync(id, request, cancellationToken));
 
-    [HttpPost("{id:guid}/actions")]
-    public async Task<ActionResult<ClassTypeDetailDto>> AddAction(Guid id, AddActionRequest request, CancellationToken cancellationToken) =>
+    [HttpPost("{id:int}/actions")]
+    public async Task<ActionResult<ClassTypeDetailDto>> AddAction(int id, AddActionRequest request, CancellationToken cancellationToken) =>
         Ok(await workflowService.AddActionAsync(id, request, cancellationToken));
 }

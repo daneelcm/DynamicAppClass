@@ -2,10 +2,9 @@ using DynamicAppClass.Domain.Enums;
 
 namespace DynamicAppClass.Domain.Entities;
 
-public sealed class ClassField
+public sealed class ClassField : BaseEntity
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid ClassTypeId { get; set; }
+    public int ClassTypeId { get; set; }
     public string Name { get; set; } = string.Empty;
     public ClassFieldType FieldType { get; set; }
     public bool IsRequired { get; set; }

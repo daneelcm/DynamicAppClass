@@ -1,11 +1,11 @@
 namespace DynamicAppClass.Domain.Entities;
 
-public sealed class ClassType
+public sealed class ClassType : BaseEntity
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public Guid ConcurrencyToken { get; set; } = Guid.NewGuid();
+
     public List<ClassField> Fields { get; set; } = [];
     public List<ClassStatus> Statuses { get; set; } = [];
     public List<ClassAction> Actions { get; set; } = [];

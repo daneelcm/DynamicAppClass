@@ -1,13 +1,13 @@
 namespace DynamicAppClass.Domain.Entities;
 
-public sealed class ClassInstance
+public sealed class ClassInstance : BaseEntity
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid ClassTypeId { get; set; }
-    public Guid CurrentStatusId { get; set; }
+    public int ClassTypeId { get; set; }
+    public int CurrentStatusId { get; set; }
     public string Title { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
     public Guid ConcurrencyToken { get; set; } = Guid.NewGuid();
     public List<ClassInstanceFieldValue> FieldValues { get; set; } = [];
 
@@ -17,7 +17,7 @@ public sealed class ClassInstance
         return classType.Actions.Where(action => action.FromStatusId == CurrentStatusId);
     }
 
-    public void Execute(ClassType classType, Guid actionId)
+    public void Execute(ClassType classType, int actionId)
     {
         EnsureBelongsTo(classType);
         var action = classType.Actions.SingleOrDefault(candidate => candidate.Id == actionId);
