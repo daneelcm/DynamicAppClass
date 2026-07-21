@@ -10,14 +10,14 @@ import { ClassField, ClassInstanceSummary, ClassTypeDetail, ClassTypeSummary } f
   template: `
     <section class="page-heading">
       <div>
-        <h1>Class Instances</h1>
+        <h1>Process</h1>
         <p>Create and process individual items from configured class types.</p>
       </div>
     </section>
 
     <section class="two-column">
       <form class="panel" [formGroup]="form" (ngSubmit)="create()">
-        <h2>New Instance</h2>
+        <h2>New Process</h2>
         <label>Class Type
           <select formControlName="classTypeId" (change)="selectType()">
             <option value="">Choose a type</option>

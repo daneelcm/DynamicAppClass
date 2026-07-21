@@ -6,3 +6,5 @@
 *.log
 .angular/
 /.vs
+/src/DynamicAppClass.Api/dynamic-app-class.db-shm
+/src/DynamicAppClass.Api/dynamic-app-class.db-wal

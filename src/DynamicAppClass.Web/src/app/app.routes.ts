@@ -5,10 +5,10 @@ import { ClassTypeDetailPage } from './pages/class-types/class-type-detail';
 import { ClassTypesList } from './pages/class-types/class-types-list';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'class-types' },
+  { path: '', pathMatch: 'full', redirectTo: 'instances' },
   { path: 'class-types', component: ClassTypesList },
   { path: 'class-types/:id', component: ClassTypeDetailPage },
   { path: 'instances', component: ClassInstancesList },
   { path: 'instances/:id', component: ClassInstanceDetailPage },
-  { path: '**', redirectTo: 'class-types' }
+  { path: '**', redirectTo: 'instances' }
 ];
