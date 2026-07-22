@@ -21,37 +21,37 @@ public static class SeedData
             Description = "Tracks internal support requests from intake through closure."
         };
 
-        var titleField = new ClassField { ClassTypeId = supportTicket.Id, Name = "Title", FieldType = ClassFieldType.Text, IsRequired = true, SortOrder = 10 };
-        var descriptionField = new ClassField { ClassTypeId = supportTicket.Id, Name = "Description", FieldType = ClassFieldType.LongText, IsRequired = true, SortOrder = 20 };
-        var priorityField = new ClassField { ClassTypeId = supportTicket.Id, Name = "Priority", FieldType = ClassFieldType.Select, IsRequired = true, SortOrder = 30, OptionsCsv = "Low|Medium|High" };
-        var requestedByField = new ClassField { ClassTypeId = supportTicket.Id, Name = "Requested By", FieldType = ClassFieldType.Text, IsRequired = true, SortOrder = 40 };
+        var titleField = new ClassField { Name = "Title", FieldType = ClassFieldType.Text, IsRequired = true, SortOrder = 10 };
+        var descriptionField = new ClassField { Name = "Description", FieldType = ClassFieldType.LongText, IsRequired = true, SortOrder = 20 };
+        var priorityField = new ClassField { Name = "Priority", FieldType = ClassFieldType.Select, IsRequired = true, SortOrder = 30, OptionsCsv = "Low|Medium|High" };
+        var requestedByField = new ClassField { Name = "Requested By", FieldType = ClassFieldType.Text, IsRequired = true, SortOrder = 40 };
         supportTicket.Fields.AddRange([titleField, descriptionField, priorityField, requestedByField]);
 
-        var newStatus = new ClassStatus { ClassTypeId = supportTicket.Id, Name = "New", SortOrder = 10 };
-        var inProgressStatus = new ClassStatus { ClassTypeId = supportTicket.Id, Name = "In Progress", SortOrder = 20 };
-        var resolvedStatus = new ClassStatus { ClassTypeId = supportTicket.Id, Name = "Resolved", SortOrder = 30 };
-        var closedStatus = new ClassStatus { ClassTypeId = supportTicket.Id, Name = "Closed", SortOrder = 40 };
+        var newStatus = new ClassStatus { Name = "New", SortOrder = 10 };
+        var inProgressStatus = new ClassStatus { Name = "In Progress", SortOrder = 20 };
+        var resolvedStatus = new ClassStatus { Name = "Resolved", SortOrder = 30 };
+        var closedStatus = new ClassStatus { Name = "Closed", SortOrder = 40 };
         supportTicket.Statuses.AddRange([newStatus, inProgressStatus, resolvedStatus, closedStatus]);
 
         supportTicket.Actions.AddRange(
         [
-            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Start Work", FromStatus = newStatus, ToStatus = inProgressStatus },
-            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Resolve", FromStatus = inProgressStatus, ToStatus = resolvedStatus },
-            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Close", FromStatus = resolvedStatus, ToStatus = closedStatus },
-            new ClassAction { ClassTypeId = supportTicket.Id, Name = "Reopen", FromStatus = resolvedStatus, ToStatus = inProgressStatus }
+            new ClassAction { Name = "Start Work", FromStatus = newStatus, ToStatus = inProgressStatus },
+            new ClassAction { Name = "Resolve", FromStatus = inProgressStatus, ToStatus = resolvedStatus },
+            new ClassAction { Name = "Close", FromStatus = resolvedStatus, ToStatus = closedStatus },
+            new ClassAction { Name = "Reopen", FromStatus = resolvedStatus, ToStatus = inProgressStatus }
         ]);
 
         var instance = new ClassInstance
         {
-            ClassTypeId = supportTicket.Id,
-            CurrentStatusId = newStatus.Id,
+            ClassType = supportTicket,
+            CurrentStatus = newStatus,
             Title = "Printer not working on Floor 3",
             FieldValues =
             [
-                new ClassInstanceFieldValue { ClassFieldId = titleField.Id, Value = "Printer not working on Floor 3" },
-                new ClassInstanceFieldValue { ClassFieldId = descriptionField.Id, Value = "The shared printer near reception is jammed and unavailable." },
-                new ClassInstanceFieldValue { ClassFieldId = priorityField.Id, Value = "Medium" },
-                new ClassInstanceFieldValue { ClassFieldId = requestedByField.Id, Value = "Alex Rivera" }
+                new ClassInstanceFieldValue { ClassField = titleField, Value = "Printer not working on Floor 3" },
+                new ClassInstanceFieldValue { ClassField = descriptionField, Value = "The shared printer near reception is jammed and unavailable." },
+                new ClassInstanceFieldValue { ClassField = priorityField, Value = "Medium" },
+                new ClassInstanceFieldValue { ClassField = requestedByField, Value = "Alex Rivera" }
             ]
         };
 

@@ -9,6 +9,9 @@ public sealed class ClassInstance : BaseEntity
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public Guid ConcurrencyToken { get; set; } = Guid.NewGuid();
+
+    public ClassType ClassType { get; set; } = null!;
+    public ClassStatus CurrentStatus { get; set; } = null!;
     public List<ClassInstanceFieldValue> FieldValues { get; set; } = [];
 
     public IEnumerable<ClassAction> GetAvailableActions(ClassType classType)

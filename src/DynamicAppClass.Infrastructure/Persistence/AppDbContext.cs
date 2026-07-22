@@ -51,6 +51,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         {
             entity.HasKey(instance => instance.Id);
             entity.Property(instance => instance.Title).HasMaxLength(200).IsRequired();
+            entity.HasOne(instance => instance.ClassType).WithMany().HasForeignKey(instance => instance.ClassTypeId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(instance => instance.CurrentStatus).WithMany().HasForeignKey(instance => instance.CurrentStatusId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(instance => instance.FieldValues).WithOne().HasForeignKey(value => value.ClassInstanceId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -58,6 +60,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         {
             entity.HasKey(value => value.Id);
             entity.Property(value => value.Value).HasMaxLength(4000);
+            entity.HasOne(value => value.ClassField).WithMany().HasForeignKey(value => value.ClassFieldId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

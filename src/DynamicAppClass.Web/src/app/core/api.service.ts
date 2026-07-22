@@ -24,7 +24,7 @@ export class ApiService {
     return this.http.get<ClassTypeSummary[]>(`${API_BASE}/class-types`);
   }
 
-  getClassType(id: string) {
+  getClassType(id: number) {
     return this.http.get<ClassTypeDetail>(`${API_BASE}/class-types/${id}`);
   }
 
@@ -32,15 +32,15 @@ export class ApiService {
     return this.http.post<ClassTypeDetail>(`${API_BASE}/class-types`, payload);
   }
 
-  addField(classTypeId: string, payload: AddFieldRequest) {
+  addField(classTypeId: number, payload: AddFieldRequest) {
     return this.http.post<ClassTypeDetail>(`${API_BASE}/class-types/${classTypeId}/fields`, payload);
   }
 
-  addStatus(classTypeId: string, payload: AddStatusRequest) {
+  addStatus(classTypeId: number, payload: AddStatusRequest) {
     return this.http.post<ClassTypeDetail>(`${API_BASE}/class-types/${classTypeId}/statuses`, payload);
   }
 
-  addAction(classTypeId: string, payload: AddActionRequest) {
+  addAction(classTypeId: number, payload: AddActionRequest) {
     return this.http.post<ClassTypeDetail>(`${API_BASE}/class-types/${classTypeId}/actions`, payload);
   }
 
@@ -48,7 +48,7 @@ export class ApiService {
     return this.http.get<ClassInstanceSummary[]>(`${API_BASE}/class-instances`);
   }
 
-  getInstance(id: string) {
+  getInstance(id: number) {
     return this.http.get<ClassInstanceDetail>(`${API_BASE}/class-instances/${id}`);
   }
 
@@ -56,15 +56,15 @@ export class ApiService {
     return this.http.post<ClassInstanceDetail>(`${API_BASE}/class-instances`, payload);
   }
 
-  updateInstanceValues(id: string, payload: UpdateClassInstanceValuesRequest) {
+  updateInstanceValues(id: number, payload: UpdateClassInstanceValuesRequest) {
     return this.http.put<ClassInstanceDetail>(`${API_BASE}/class-instances/${id}/field-values`, payload);
   }
 
-  getAvailableActions(id: string) {
+  getAvailableActions(id: number) {
     return this.http.get<ClassAction[]>(`${API_BASE}/class-instances/${id}/available-actions`);
   }
 
-  executeAction(id: string, payload: ExecuteActionRequest) {
+  executeAction(id: number, payload: ExecuteActionRequest) {
     return this.http.post<ClassInstanceDetail>(`${API_BASE}/class-instances/${id}/actions`, payload);
   }
 }

@@ -80,7 +80,7 @@ export class ClassInstancesList implements OnInit {
   error = '';
 
   form = this.fb.group({
-    classTypeId: ['', Validators.required],
+    classTypeId: [0, Validators.required],
     fieldValues: this.fb.group({})
   });
 
@@ -131,7 +131,7 @@ export class ClassInstancesList implements OnInit {
 
     const raw = this.form.getRawValue();
     this.api.createInstance({
-      classTypeId: raw.classTypeId ?? '',
+      classTypeId: raw.classTypeId ?? 0,
       fieldValues: raw.fieldValues as Record<string, string | null>,
       concurrencyToken: this.selectedType.concurrencyToken
     }).subscribe({

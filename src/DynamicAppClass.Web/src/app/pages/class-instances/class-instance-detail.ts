@@ -70,11 +70,11 @@ export class ClassInstanceDetailPage implements OnInit {
   instance?: ClassInstanceDetail;
   classType?: ClassTypeDetail;
   error = '';
-  private id = '';
+  private id = 0;
   form = this.fb.group({});
 
   ngOnInit() {
-    this.id = this.route.snapshot.paramMap.get('id') ?? '';
+    this.id = Number.parseInt(this.route.snapshot.paramMap.get('id') ?? '0');
     this.load();
   }
 
@@ -95,7 +95,7 @@ export class ClassInstanceDetailPage implements OnInit {
     });
   }
 
-  execute(actionId: string) {
+  execute(actionId: number) {
     this.api.executeAction(this.id, {
       actionId,
       concurrencyToken: this.instance?.concurrencyToken

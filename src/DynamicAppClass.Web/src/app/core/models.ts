@@ -1,7 +1,7 @@
 export type ClassFieldType = 'Text' | 'LongText' | 'Select' | 'Number' | 'Date' | 'Boolean';
 
 export interface ClassTypeSummary {
-  id: string;
+  id: number;
   name: string;
   description: string;
   fieldCount: number;
@@ -11,7 +11,7 @@ export interface ClassTypeSummary {
 }
 
 export interface ClassTypeDetail {
-  id: string;
+  id: number;
   name: string;
   description: string;
   fields: ClassField[];
@@ -21,7 +21,7 @@ export interface ClassTypeDetail {
 }
 
 export interface ClassField {
-  id: string;
+  id: number;
   name: string;
   fieldType: ClassFieldType;
   isRequired: boolean;
@@ -30,26 +30,26 @@ export interface ClassField {
 }
 
 export interface ClassStatus {
-  id: string;
+  id: number;
   name: string;
   sortOrder: number;
 }
 
 export interface ClassAction {
-  id: string;
+  id: number;
   name: string;
-  fromStatusId: string;
+  fromStatusId: number;
   fromStatusName: string;
-  toStatusId: string;
+  toStatusId: number;
   toStatusName: string;
 }
 
 export interface ClassInstanceSummary {
-  id: string;
-  classTypeId: string;
+  id: number;
+  classTypeId: number;
   classTypeName: string;
   title: string;
-  currentStatusId: string;
+  currentStatusId: number;
   currentStatusName: string;
   createdAt: string;
   updatedAt: string;
@@ -63,7 +63,7 @@ export interface ClassInstanceDetail extends ClassInstanceSummary {
 }
 
 export interface ClassInstanceFieldValue {
-  fieldId: string;
+  fieldId: number;
   fieldName: string;
   value: string | null;
 }
@@ -86,13 +86,13 @@ export interface AddStatusRequest {
 
 export interface AddActionRequest {
   name: string;
-  fromStatusId: string;
-  toStatusId: string;
+  fromStatusId: number;
+  toStatusId: number;
   concurrencyToken?: string;
 }
 
 export interface CreateClassInstanceRequest {
-  classTypeId: string;
+  classTypeId: number;
   title?: string;
   fieldValues: Record<string, string | null>;
   concurrencyToken?: string;
@@ -104,6 +104,6 @@ export interface UpdateClassInstanceValuesRequest {
 }
 
 export interface ExecuteActionRequest {
-  actionId: string;
+  actionId: number;
   concurrencyToken?: string;
 }

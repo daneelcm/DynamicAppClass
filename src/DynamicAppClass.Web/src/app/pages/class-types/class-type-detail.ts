@@ -93,7 +93,7 @@ export class ClassTypeDetailPage implements OnInit {
   error = '';
   isLoading = true;
   fieldTypes: ClassFieldType[] = ['Text', 'LongText', 'Select', 'Number', 'Date', 'Boolean'];
-  id = '';
+  id = 0;
 
   fieldForm = this.fb.nonNullable.group({
     name: ['', Validators.required],
@@ -110,13 +110,13 @@ export class ClassTypeDetailPage implements OnInit {
 
   actionForm = this.fb.nonNullable.group({
     name: ['', Validators.required],
-    fromStatusId: ['', Validators.required],
-    toStatusId: ['', Validators.required]
+    fromStatusId: [0, Validators.required],
+    toStatusId: [0, Validators.required]
   });
 
   ngOnInit() {
     console.log('ClassTypeDetailPage.ngOnInit called');
-    this.id = this.route.snapshot.paramMap.get('id') ?? '';
+    this.id = Number.parseInt(this.route.snapshot.paramMap.get('id') ?? '0');
     console.log('Got id:', this.id);
     this.load();
   }
