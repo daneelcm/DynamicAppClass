@@ -9,6 +9,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Lookup> Lookups => Set<Lookup>();
     public DbSet<ClassType> ClassTypes => Set<ClassType>();
     public DbSet<ClassField> ClassFields => Set<ClassField>();
+    public DbSet<ClassFieldLookup> ClassFieldLookups => Set<ClassFieldLookup>();
     public DbSet<ClassStatus> ClassStatuses => Set<ClassStatus>();
     public DbSet<ClassAction> ClassActions => Set<ClassAction>();
     public DbSet<ClassInstance> ClassInstances => Set<ClassInstance>();
@@ -31,6 +32,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(field => field.Id);
             entity.Property(field => field.OverrideName).HasMaxLength(120);
             entity.HasOne(field => field.Field).WithMany().HasForeignKey(field => field.FieldId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(field => field.Options).WithOne().HasForeignKey(option => option.ClassFieldId).OnDelete(DeleteBehavior.NoAction);
             entity.Ignore(field => field.Label);
         });
 
@@ -78,6 +80,17 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(lookup => lookup.Id);
             entity.Property(lookup => lookup.Value).HasMaxLength(120).IsRequired();
             entity.Property(lookup => lookup.Caption).HasMaxLength(400).IsRequired();
+        });
+
+        modelBuilder.Entity<ClassFieldLookup>(entity =>
+        {
+            entity.HasKey(option => option.Id);
+            entity.Property(option => option.OverrideValue).HasMaxLength(120);
+            entity.Property(option => option.OverrideCaption).HasMaxLength(400);
+            entity.HasOne(option => option.Lookup).WithMany().HasForeignKey(option => option.LookupId).OnDelete(DeleteBehavior.NoAction);
+            entity.Ignore(option => option.Value);
+            entity.Ignore(option => option.Caption);
+            entity.Ignore(option => option.SortOrder);
         });
     }
 }

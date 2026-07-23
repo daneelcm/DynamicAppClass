@@ -24,7 +24,10 @@ public sealed class ClassTypeRepository(AppDbContext dbContext) : IClassTypeRepo
 
     private static IQueryable<ClassType> IncludeGraph(IQueryable<ClassType> query) =>
         query.Include(classType => classType.Fields)
-                .ThenInclude(cf => cf.Field.Options)
+                .ThenInclude(cf => cf.Field)
+            .Include(classType => classType.Fields)
+                .ThenInclude(cf => cf.Options)
+                .ThenInclude(co => co.Lookup)
             .Include(classType => classType.Statuses)
             .Include(classType => classType.Actions);
 }

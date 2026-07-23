@@ -29,7 +29,7 @@ import { ClassField, ClassInstanceDetail, ClassTypeDetail } from '../../core/mod
               } @else if (field.fieldType === 'Select') {
                 <select [formControlName]="field.id">
                   <option value="">Choose</option>
-                  @for (option of field.options; track option) { <option [value]="option">{{ option }}</option> }
+                  @for (option of field.options; track option) { <option [value]="option.value">{{ option.caption }}</option> }
                 </select>
               } @else if (field.fieldType === 'Boolean') {
                 <select [formControlName]="field.id"><option value="false">No</option><option value="true">Yes</option></select>

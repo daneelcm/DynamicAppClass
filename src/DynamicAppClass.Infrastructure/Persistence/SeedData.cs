@@ -21,9 +21,19 @@ public static class SeedData
             Description = "Tracks internal support requests from intake through closure."
         };
 
+        var lookupLow = new Lookup { Value = "1", Caption = "Low", SortOrder = 10 };
+        var lookupMedium = new Lookup { Value = "2", Caption = "Medium", SortOrder = 20 };
+        var lookupHigh = new Lookup { Value = "3", Caption = "High", SortOrder = 30 };
+
         var titleField = new ClassField { OverrideName = "Subject", Field = new Field { Name = "Title", FieldType = ClassFieldType.Text }, IsRequired = true, SortOrder = 10 };
         var descriptionField = new ClassField { Field = new Field { Name = "Description", FieldType = ClassFieldType.LongText }, IsRequired = true, SortOrder = 20 };
-        var priorityField = new ClassField { Field = new Field { Name = "Priority", FieldType = ClassFieldType.Select, Options = [ new Lookup { Caption = "Low", Value = "Low" }, new Lookup { Caption = "Medium", Value = "Medium" }, new Lookup { Caption = "High", Value = "High" } ] }, IsRequired = true, SortOrder = 30 };
+        var priorityField = new ClassField { 
+            Field = new Field { Name = "Priority", FieldType = ClassFieldType.Select, Options = [ lookupLow, lookupMedium, lookupHigh ] },
+            IsRequired = true, SortOrder = 30, Options = [ 
+                new() { Lookup = lookupLow },
+                new() { Lookup = lookupHigh }
+            ]
+        };
         var requestedByField = new ClassField { Field = new Field { Name = "Requested By", FieldType = ClassFieldType.Text }, IsRequired = true, SortOrder = 40 };
         supportTicket.Fields.AddRange([titleField, descriptionField, priorityField, requestedByField]);
 
@@ -50,7 +60,7 @@ public static class SeedData
             [
                 new ClassInstanceFieldValue { ClassField = titleField, Value = "Printer not working on Floor 3" },
                 new ClassInstanceFieldValue { ClassField = descriptionField, Value = "The shared printer near reception is jammed and unavailable." },
-                new ClassInstanceFieldValue { ClassField = priorityField, Value = "Medium" },
+                new ClassInstanceFieldValue { ClassField = priorityField, Value = "1" },
                 new ClassInstanceFieldValue { ClassField = requestedByField, Value = "Alex Rivera" }
             ]
         };

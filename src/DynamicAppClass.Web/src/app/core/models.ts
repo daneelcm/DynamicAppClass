@@ -1,4 +1,11 @@
+import { KeyValue } from "@angular/common";
+
 export type ClassFieldType = 'Text' | 'LongText' | 'Select' | 'Number' | 'Date' | 'Boolean';
+
+export interface FieldOptions {
+  value: string;
+  caption: string;
+}
 
 export interface ClassTypeSummary {
   id: number;
@@ -26,7 +33,7 @@ export interface ClassField {
   fieldType: ClassFieldType;
   isRequired: boolean;
   sortOrder: number;
-  options: string[];
+  options: FieldOptions[];
 }
 
 export interface ClassStatus {

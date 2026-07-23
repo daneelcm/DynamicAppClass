@@ -1,5 +1,3 @@
-using DynamicAppClass.Domain.Enums;
-
 namespace DynamicAppClass.Domain.Entities;
 
 public sealed class ClassField : BaseEntity
@@ -12,4 +10,5 @@ public sealed class ClassField : BaseEntity
 
     public string Label => OverrideName ?? Field.Name;
     public Field Field { get; set; } = null!;
+    public List<ClassFieldLookup> Options { get; set; } = [];
 }

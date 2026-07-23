@@ -10,7 +10,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
     public async Task<IReadOnlyList<ClassTypeSummaryDto>> ListClassTypesAsync(CancellationToken cancellationToken)
     {
         var results = await classTypes.ListAsync(cancellationToken);
-        return results.Select(MapSummary).ToList();
+        return [.. results.Select(MapSummary)];
     }
 
     public async Task<ClassTypeDetailDto> GetClassTypeAsync(int id, CancellationToken cancellationToken)
@@ -33,6 +33,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         ValidateText(request.Name, "Field name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
         ValidateConcurrencyToken(classType.ConcurrencyToken, request.ConcurrencyToken);
+        var lookups = request.Options?.Select((option, index) => new Lookup { Caption = option.Trim(), Value = index.ToString() }).ToList() ?? [];
         await classFields.AddAsync(new ClassField
         {
             ClassTypeId = classTypeId,
@@ -43,8 +44,9 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
             {
                 Name = request.Name.Trim(),
                 FieldType = request.FieldType,
-                Options = request.Options?.Select(option => new Lookup { Caption = option.Trim(), Value = option.Trim() }).ToList() ?? []
-            }
+                Options = lookups
+            },
+            Options = lookups?.Select((lookup, index) => new ClassFieldLookup { Lookup = lookup }).ToList() ?? []
         }, cancellationToken);
         await classFields.SaveChangesAsync(cancellationToken);
         return MapDetail(classType);
@@ -210,7 +212,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         new(classType.Id, classType.Name, classType.Description, classType.Fields.OrderBy(field => field.SortOrder).Select(MapField).ToList(), classType.Statuses.OrderBy(status => status.SortOrder).Select(MapStatus).ToList(), classType.Actions.Select(action => MapAction(action, classType)).ToList(), classType.ConcurrencyToken);
 
     private static ClassFieldDto MapField(ClassField field) =>
-        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.SortOrder, [..field.Field.Options?.OrderBy(x => x.SortOrder ?? 99).Select(x => x.Value) ?? []]);
+        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.SortOrder, [..field.Options?.OrderBy(x => x.SortOrder).Select(x => new FieldOptionsDto(x.Value, x.Caption)) ?? []]);
 
     private static ClassStatusDto MapStatus(ClassStatus status) =>
         new(status.Id, status.Name, status.SortOrder);
