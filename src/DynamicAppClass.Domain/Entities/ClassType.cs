@@ -14,9 +14,9 @@ public sealed class ClassType : BaseEntity
 
     public void AddField(ClassField field)
     {
-        if (Fields.Any(existing => string.Equals(existing.Name, field.Name, StringComparison.OrdinalIgnoreCase)))
+        if (Fields.Any(existing => string.Equals(existing.OverrideName, field.OverrideName, StringComparison.OrdinalIgnoreCase)))
         {
-            throw new InvalidOperationException($"A field named '{field.Name}' already exists.");
+            throw new InvalidOperationException($"A field named '{field.OverrideName}' already exists.");
         }
 
         Fields.Add(field);

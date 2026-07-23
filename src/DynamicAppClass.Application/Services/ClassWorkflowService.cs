@@ -36,11 +36,15 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         await classFields.AddAsync(new ClassField
         {
             ClassTypeId = classTypeId,
-            Name = request.Name.Trim(),
-            FieldType = request.FieldType,
+            OverrideName = request.Name.Trim(),
             IsRequired = request.IsRequired,
             SortOrder = request.SortOrder,
-            OptionsCsv = request.Options is { Count: > 0 } ? string.Join("|", request.Options.Select(option => option.Trim()).Where(option => option.Length > 0)) : null
+            Field = new Field
+            {
+                Name = request.Name.Trim(),
+                FieldType = request.FieldType,
+                Options = request.Options?.Select(option => new Lookup { Caption = option.Trim(), Value = option.Trim() }).ToList() ?? []
+            }
         }, cancellationToken);
         await classFields.SaveChangesAsync(cancellationToken);
         return MapDetail(classType);
@@ -173,14 +177,14 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         {
             if (!values.TryGetValue(field.Id, out var value) || string.IsNullOrWhiteSpace(value))
             {
-                throw new InvalidOperationException($"Field '{field.Name}' is required.");
+                throw new InvalidOperationException($"Field '{field.OverrideName}' is required.");
             }
         }
     }
 
     private static string GetTitleFromFields(ClassType classType, IReadOnlyDictionary<int, string?> values)
     {
-        var titleField = classType.Fields.FirstOrDefault(field => field.Name.Equals("Title", StringComparison.OrdinalIgnoreCase))
+        var titleField = classType.Fields.FirstOrDefault(field => field.OverrideName.Equals("Title", StringComparison.OrdinalIgnoreCase))
             ?? classType.Fields.OrderBy(field => field.SortOrder).FirstOrDefault();
 
         if (titleField is not null && values.TryGetValue(titleField.Id, out var title) && !string.IsNullOrWhiteSpace(title))
@@ -206,7 +210,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         new(classType.Id, classType.Name, classType.Description, classType.Fields.OrderBy(field => field.SortOrder).Select(MapField).ToList(), classType.Statuses.OrderBy(status => status.SortOrder).Select(MapStatus).ToList(), classType.Actions.Select(action => MapAction(action, classType)).ToList(), classType.ConcurrencyToken);
 
     private static ClassFieldDto MapField(ClassField field) =>
-        new(field.Id, field.Name, field.FieldType, field.IsRequired, field.SortOrder, SplitOptions(field.OptionsCsv));
+        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.SortOrder, [..field.Field.Options?.OrderBy(x => x.SortOrder ?? 99).Select(x => x.Value) ?? []]);
 
     private static ClassStatusDto MapStatus(ClassStatus status) =>
         new(status.Id, status.Name, status.SortOrder);
@@ -228,12 +232,9 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
     {
         var status = classType.Statuses.Single(candidate => candidate.Id == instance.CurrentStatusId);
         var values = classType.Fields.OrderBy(field => field.SortOrder)
-            .Select(field => new ClassInstanceFieldValueDto(field.Id, field.Name, instance.FieldValues.SingleOrDefault(value => value.ClassFieldId == field.Id)?.Value))
+            .Select(field => new ClassInstanceFieldValueDto(field.Id, field.OverrideName, instance.FieldValues.SingleOrDefault(value => value.ClassFieldId == field.Id)?.Value))
             .ToList();
 
         return new(instance.Id, classType.Id, classType.Name, instance.Title, MapStatus(status), values, instance.GetAvailableActions(classType).Select(action => MapAction(action, classType)).ToList(), instance.CreatedAt, instance.UpdatedAt, instance.ConcurrencyToken);
     }
-
-    private static IReadOnlyList<string> SplitOptions(string? optionsCsv) =>
-        string.IsNullOrWhiteSpace(optionsCsv) ? [] : optionsCsv.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }

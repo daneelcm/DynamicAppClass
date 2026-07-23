@@ -5,6 +5,8 @@ namespace DynamicAppClass.Infrastructure.Persistence;
 
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<Field> Fields => Set<Field>();
+    public DbSet<Lookup> Lookups => Set<Lookup>();
     public DbSet<ClassType> ClassTypes => Set<ClassType>();
     public DbSet<ClassField> ClassFields => Set<ClassField>();
     public DbSet<ClassStatus> ClassStatuses => Set<ClassStatus>();
@@ -27,9 +29,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         modelBuilder.Entity<ClassField>(entity =>
         {
             entity.HasKey(field => field.Id);
-            entity.Property(field => field.Name).HasMaxLength(120).IsRequired();
-            entity.Property(field => field.FieldType).HasConversion<string>().HasMaxLength(40);
-            entity.Property(field => field.OptionsCsv).HasMaxLength(1000);
+            entity.Property(field => field.OverrideName).HasMaxLength(120);
+            entity.HasOne(field => field.Field).WithMany().HasForeignKey(field => field.FieldId).OnDelete(DeleteBehavior.Restrict);
+            entity.Ignore(field => field.Label);
         });
 
         modelBuilder.Entity<ClassStatus>(entity =>
@@ -61,6 +63,21 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(value => value.Id);
             entity.Property(value => value.Value).HasMaxLength(4000);
             entity.HasOne(value => value.ClassField).WithMany().HasForeignKey(value => value.ClassFieldId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Field>(entity =>
+        {
+            entity.HasKey(field => field.Id);
+            entity.Property(field => field.Name).HasMaxLength(120).IsRequired();
+            entity.Property(field => field.FieldType).HasConversion<string>().HasMaxLength(40);
+            entity.HasMany(field => field.Options).WithOne().HasForeignKey(option => option.FieldId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Lookup>(entity =>
+        {
+            entity.HasKey(lookup => lookup.Id);
+            entity.Property(lookup => lookup.Value).HasMaxLength(120).IsRequired();
+            entity.Property(lookup => lookup.Caption).HasMaxLength(400).IsRequired();
         });
     }
 }

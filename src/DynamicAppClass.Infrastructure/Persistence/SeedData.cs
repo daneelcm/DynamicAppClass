@@ -21,10 +21,10 @@ public static class SeedData
             Description = "Tracks internal support requests from intake through closure."
         };
 
-        var titleField = new ClassField { Name = "Title", FieldType = ClassFieldType.Text, IsRequired = true, SortOrder = 10 };
-        var descriptionField = new ClassField { Name = "Description", FieldType = ClassFieldType.LongText, IsRequired = true, SortOrder = 20 };
-        var priorityField = new ClassField { Name = "Priority", FieldType = ClassFieldType.Select, IsRequired = true, SortOrder = 30, OptionsCsv = "Low|Medium|High" };
-        var requestedByField = new ClassField { Name = "Requested By", FieldType = ClassFieldType.Text, IsRequired = true, SortOrder = 40 };
+        var titleField = new ClassField { OverrideName = "Subject", Field = new Field { Name = "Title", FieldType = ClassFieldType.Text }, IsRequired = true, SortOrder = 10 };
+        var descriptionField = new ClassField { Field = new Field { Name = "Description", FieldType = ClassFieldType.LongText }, IsRequired = true, SortOrder = 20 };
+        var priorityField = new ClassField { Field = new Field { Name = "Priority", FieldType = ClassFieldType.Select, Options = [ new Lookup { Caption = "Low", Value = "Low" }, new Lookup { Caption = "Medium", Value = "Medium" }, new Lookup { Caption = "High", Value = "High" } ] }, IsRequired = true, SortOrder = 30 };
+        var requestedByField = new ClassField { Field = new Field { Name = "Requested By", FieldType = ClassFieldType.Text }, IsRequired = true, SortOrder = 40 };
         supportTicket.Fields.AddRange([titleField, descriptionField, priorityField, requestedByField]);
 
         var newStatus = new ClassStatus { Name = "New", SortOrder = 10 };
