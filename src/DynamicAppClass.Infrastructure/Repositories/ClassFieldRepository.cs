@@ -10,7 +10,7 @@ public sealed class ClassFieldRepository(AppDbContext dbContext) : IClassFieldRe
     public async Task<IReadOnlyList<ClassField>> ListAsync(CancellationToken cancellationToken) =>
         await dbContext.ClassFields
             .AsNoTracking()
-            .OrderBy(classField => classField.OverrideName)
+            .OrderBy(classField => classField.Label)
             .ToListAsync(cancellationToken);
 
     public async Task<ClassField?> GetAsync(int id, CancellationToken cancellationToken) =>

@@ -37,7 +37,6 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         await classFields.AddAsync(new ClassField
         {
             ClassTypeId = classTypeId,
-            OverrideName = request.Name.Trim(),
             IsRequired = request.IsRequired,
             SortOrder = request.SortOrder,
             Field = new Field
@@ -46,7 +45,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
                 FieldType = request.FieldType,
                 Options = lookups
             },
-            Options = lookups?.Select((lookup, index) => new ClassFieldLookup { Lookup = lookup }).ToList() ?? []
+            Options = lookups?.Select(lookup => new ClassFieldLookup { Lookup = lookup }).ToList() ?? []
         }, cancellationToken);
         await classFields.SaveChangesAsync(cancellationToken);
         return MapDetail(classType);
@@ -179,14 +178,14 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         {
             if (!values.TryGetValue(field.Id, out var value) || string.IsNullOrWhiteSpace(value))
             {
-                throw new InvalidOperationException($"Field '{field.OverrideName}' is required.");
+                throw new InvalidOperationException($"Field '{field.Label}' is required.");
             }
         }
     }
 
     private static string GetTitleFromFields(ClassType classType, IReadOnlyDictionary<int, string?> values)
     {
-        var titleField = classType.Fields.FirstOrDefault(field => field.OverrideName.Equals("Title", StringComparison.OrdinalIgnoreCase))
+        var titleField = classType.Fields.FirstOrDefault(field => field.Label.Equals("Title", StringComparison.OrdinalIgnoreCase))
             ?? classType.Fields.OrderBy(field => field.SortOrder).FirstOrDefault();
 
         if (titleField is not null && values.TryGetValue(titleField.Id, out var title) && !string.IsNullOrWhiteSpace(title))
@@ -234,7 +233,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
     {
         var status = classType.Statuses.Single(candidate => candidate.Id == instance.CurrentStatusId);
         var values = classType.Fields.OrderBy(field => field.SortOrder)
-            .Select(field => new ClassInstanceFieldValueDto(field.Id, field.OverrideName, instance.FieldValues.SingleOrDefault(value => value.ClassFieldId == field.Id)?.Value))
+            .Select(field => new ClassInstanceFieldValueDto(field.Id, field.Label, instance.FieldValues.SingleOrDefault(value => value.ClassFieldId == field.Id)?.Value))
             .ToList();
 
         return new(instance.Id, classType.Id, classType.Name, instance.Title, MapStatus(status), values, instance.GetAvailableActions(classType).Select(action => MapAction(action, classType)).ToList(), instance.CreatedAt, instance.UpdatedAt, instance.ConcurrencyToken);
