@@ -1,11 +1,13 @@
 using DynamicAppClass.Application.Dtos;
 using DynamicAppClass.Application.Interfaces;
 using DynamicAppClass.Domain.Entities;
+using DynamicAppClass.Domain.Enums;
 
 namespace DynamicAppClass.Application.Services;
 
 public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClassInstanceRepository classInstances,
-    IClassFieldRepository classFields, IClassStatusRepository classStatuses, IClassActionRepository classActions)
+    IClassFieldRepository classFields, IClassStatusRepository classStatuses, IClassActionRepository classActions,
+    IClassInstanceFieldValueRepository classInstanceFieldValues)
 {
     public async Task<IReadOnlyList<ClassTypeSummaryDto>> ListClassTypesAsync(CancellationToken cancellationToken)
     {
@@ -66,7 +68,16 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         ValidateText(request.Name, "Action name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
         ValidateConcurrencyToken(classType.ConcurrencyToken, request.ConcurrencyToken);
-        await classActions.AddAsync(new ClassAction { ClassTypeId = classTypeId, Name = request.Name.Trim(), FromStatusId = request.FromStatusId, ToStatusId = request.ToStatusId }, cancellationToken);
+        await classActions.AddAsync(
+            new ClassAction {
+                ClassTypeId = classTypeId,
+                Name = request.Name.Trim(),
+                AssignClassFieldId = request.AssignClassFieldId,
+                ValueToAssign = request.ValueToAssign.Trim(),
+                ConditionClassFieldId = request.ConditionClassFieldId,
+                ConditionValue = request.ConditionValue?.Trim()
+            }, cancellationToken
+        );
         await classActions.SaveChangesAsync(cancellationToken);
         return MapDetail(classType);
     }
@@ -149,6 +160,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         ValidateConcurrencyToken(instance.ConcurrencyToken, request.ConcurrencyToken);
         instance.Execute(classType, request.ActionId);
         await classInstances.SaveChangesAsync(cancellationToken);
+        await classInstanceFieldValues.SaveChangesAsync(cancellationToken);
         return MapInstanceDetail(instance, classType);
     }
 
@@ -218,9 +230,15 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
 
     private static ClassActionDto MapAction(ClassAction action, ClassType classType)
     {
-        var from = classType.Statuses.Single(status => status.Id == action.FromStatusId);
-        var to = classType.Statuses.Single(status => status.Id == action.ToStatusId);
-        return new(action.Id, action.Name, from.Id, from.Name, to.Id, to.Name);
+        var assignField = classType.Fields.Single(field => field.Id == action.AssignClassFieldId);
+        var conditionField = classType.Fields.SingleOrDefault(field => field.Id == action.ConditionClassFieldId);
+        return new(
+            action.Id, action.Name, assignField.Id, assignField.Label, 
+            assignField.Field.FieldType == ClassFieldType.Select ?
+                assignField.Options.First(x => x.Value == action.ValueToAssign).Caption : action.ValueToAssign, 
+            conditionField?.Id, conditionField?.Label,
+            conditionField?.Field.FieldType == ClassFieldType.Select ?
+                conditionField.Options.First(x => x.Value == action.ConditionValue).Caption : action.ConditionValue);
     }
 
     private static ClassInstanceSummaryDto MapInstanceSummary(ClassInstance instance, ClassType classType)

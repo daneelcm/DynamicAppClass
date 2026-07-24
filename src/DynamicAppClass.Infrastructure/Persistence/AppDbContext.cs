@@ -46,9 +46,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         {
             entity.HasKey(action => action.Id);
             entity.Property(action => action.Name).HasMaxLength(80).IsRequired();
-            entity.HasOne(action => action.FromStatus).WithMany().HasForeignKey(action => action.FromStatusId).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(action => action.ToStatus).WithMany().HasForeignKey(action => action.ToStatusId).OnDelete(DeleteBehavior.Restrict);
-            entity.Ignore(action => action.Transition);
+            entity.HasOne(action => action.AssignClassField).WithMany().HasForeignKey(action => action.AssignClassFieldId).OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(action => action.ConditionClassField).WithMany().HasForeignKey(action => action.ConditionClassFieldId).OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<ClassInstance>(entity =>

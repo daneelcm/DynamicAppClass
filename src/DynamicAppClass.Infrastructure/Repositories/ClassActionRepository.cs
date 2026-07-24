@@ -23,5 +23,6 @@ public sealed class ClassActionRepository(AppDbContext dbContext) : IClassAction
         dbContext.SaveChangesAsync(cancellationToken);
 
     private static IQueryable<ClassAction> IncludeGraph(IQueryable<ClassAction> query) =>
-        query.Include(classAction => classAction.Transition);
+        query.Include(classAction => classAction.AssignClassField)
+             .Include(classAction => classAction.ConditionClassField);
 }

@@ -17,24 +17,30 @@ public sealed class ClassInstance : BaseEntity
     public IEnumerable<ClassAction> GetAvailableActions(ClassType classType)
     {
         EnsureBelongsTo(classType);
-        return classType.Actions.Where(action => action.FromStatusId == CurrentStatusId);
+        var actions = classType.Actions.Where(action => ((action.ConditionClassFieldId ?? 0) == 0) ||
+            (FieldValues.Any(fv => fv.ClassFieldId == action.ConditionClassFieldId && fv.Value == action.ConditionValue)));
+        return actions;
     }
 
     public void Execute(ClassType classType, int actionId)
     {
         EnsureBelongsTo(classType);
-        var action = classType.Actions.SingleOrDefault(candidate => candidate.Id == actionId);
-        if (action is null)
-        {
+        var action = classType.Actions.Single(candidate => candidate.Id == actionId) ??
             throw new InvalidOperationException("The requested action does not exist for this class type.");
-        }
 
-        if (action.FromStatusId != CurrentStatusId)
+        if (action.ConditionClassFieldId > 0)
         {
-            throw new InvalidOperationException("The requested action is not valid for the instance's current status.");
+            var field = FieldValues.Single(fv => fv.ClassFieldId == action.ConditionClassFieldId) ??
+                throw new InvalidOperationException("The requested action is not valid for the field of this instance's");
+
+            if (field.Value != action.ConditionValue)
+                throw new InvalidOperationException("The requested action is not valid for the instance's current value.");
         }
 
-        CurrentStatusId = action.ToStatusId;
+        var assignField = FieldValues.Single(fv => fv.ClassFieldId == action.AssignClassFieldId) ??
+            throw new InvalidOperationException("The requested action is not valid for the field of this instance's");
+
+        assignField.Value = action.ValueToAssign;
         UpdatedAt = DateTime.UtcNow;
     }
 

@@ -4,10 +4,14 @@ public sealed class ClassAction : BaseEntity
 {
     public int ClassTypeId { get; set; }
     public required string Name { get; set; }
-    public int FromStatusId { get; set; }
-    public int ToStatusId { get; set; }
+    
+    public int AssignClassFieldId { get; set; }
+    public required string ValueToAssign { get; set; }
+    
+    public int? ConditionClassFieldId { get; set; }
+    public string? ConditionValue { get; set; }
 
-    public ClassStatus FromStatus { get; set; }
-    public ClassStatus ToStatus { get; set; }
-    public WorkflowTransition Transition => new(Id, FromStatusId, ToStatusId);
+
+    public ClassField AssignClassField { get; set; } = null!;
+    public ClassField? ConditionClassField { get; set; }
 }

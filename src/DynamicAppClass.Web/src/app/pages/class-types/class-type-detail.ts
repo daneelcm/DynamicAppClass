@@ -39,7 +39,9 @@ import { ClassFieldType, ClassTypeDetail } from '../../core/models';
           </label>
           <label>Sort Order <input type="number" formControlName="sortOrder" /></label>
           <label class="check"><input type="checkbox" formControlName="isRequired" /> Required</label>
-          <label>Options <input formControlName="options" placeholder="Low, Medium, High" /></label>
+          @if (fieldForm.get('fieldType')?.value === 'Select') {
+            <label>Options <input formControlName="options" placeholder="Low, Medium, High" /></label>
+          }
           <button type="submit" [disabled]="fieldForm.invalid">Add Field</button>
           <ul class="compact-list">
             @for (field of classType.fields; track field.id) {
@@ -63,20 +65,39 @@ import { ClassFieldType, ClassTypeDetail } from '../../core/models';
         <form class="panel" [formGroup]="actionForm" (ngSubmit)="addAction()">
           <h2>Actions</h2>
           <label>Name <input formControlName="name" /></label>
-          <label>From
-            <select formControlName="fromStatusId">
-              @for (status of classType.statuses; track status.id) { <option [value]="status.id">{{ status.name }}</option> }
+          <label>Field
+            <select formControlName="assignClassFieldId">
+              @for (field of classType.fields; track field.id) { <option [value]="field.id">{{ field.name }}</option> }
             </select>
           </label>
-          <label>To
-            <select formControlName="toStatusId">
-              @for (status of classType.statuses; track status.id) { <option [value]="status.id">{{ status.name }}</option> }
+          <label>New Value
+            @if (classType.fields.find(f => f.id == actionForm.get('assignClassFieldId')?.value)?.fieldType === 'Select') {
+              <select formControlName="valueToAssign">
+                @for (opt of classType.fields.find(f => f.id == actionForm.get('assignClassFieldId')?.value)?.options; track opt) { <option [value]="opt.value">{{ opt.caption }}</option> }
+              </select>
+            } @else {
+              <input formControlName="valueToAssign" />
+            }
+          </label>
+          <label>Condition
+            <select formControlName="conditionClassFieldId">
+              @for (field of classType.fields; track field.id) { <option [value]="field.id">{{ field.name }}</option> }
             </select>
+          </label>
+          <label>Condition Value
+            @if (classType.fields.find(f => f.id == (actionForm.get('conditionClassFieldId')?.value ?? 0))?.fieldType === 'Select') {
+              <select formControlName="conditionValue">
+                @for (opt of classType.fields.find(f => f.id == (actionForm.get('conditionClassFieldId')?.value ?? 0))?.options; track opt) { <option [value]="opt.value">{{ opt.caption }}</option> }
+              </select>
+            } @else {
+              <input formControlName="conditionValue" />
+            }
           </label>
           <button type="submit" [disabled]="actionForm.invalid">Add Action</button>
           <ul class="compact-list">
             @for (action of classType.actions; track action.id) {
-              <li><strong>{{ action.name }}</strong><span>{{ action.fromStatusName }} → {{ action.toStatusName }}</span></li>
+              <li><strong>{{ action.name }}</strong>
+              <span>{{ action.assignFieldName }} → {{ action.valueToAssign }} {{ (action.conditionClassFieldId ?? 0) > 0 ? '| WHEN: ' + action.conditionFieldName + ' = ' + action.conditionValue : '' }}</span></li>
             }
           </ul>
         </form>
@@ -110,8 +131,10 @@ export class ClassTypeDetailPage implements OnInit {
 
   actionForm = this.fb.nonNullable.group({
     name: ['', Validators.required],
-    fromStatusId: [0, Validators.required],
-    toStatusId: [0, Validators.required]
+    assignClassFieldId: [0, Validators.required],
+    valueToAssign: ['', Validators.required],
+    conditionClassFieldId: [null],
+    conditionValue: [null]
   });
 
   ngOnInit() {
@@ -154,8 +177,8 @@ export class ClassTypeDetailPage implements OnInit {
         this.error = '';
         this.isLoading = false;
         this.cdr.detectChanges();
-        const firstStatus = type.statuses[0]?.id ?? '';
-        this.actionForm.patchValue({ fromStatusId: firstStatus, toStatusId: firstStatus });
+        // const firstStatus = type.statuses[0]?.id ?? '';
+        // this.actionForm.patchValue({ assignClassFieldId: firstStatus, toStatusId: firstStatus });
       },
       error: err => {
         console.log('API error:', err);
@@ -172,7 +195,7 @@ export class ClassTypeDetailPage implements OnInit {
         this.error = '';
         this.fieldForm.patchValue({ name: '', options: '' });
         this.statusForm.patchValue({ name: '' });
-        this.actionForm.patchValue({ name: '' });
+        this.actionForm.patchValue({ name: '', valueToAssign: '', conditionClassFieldId: null, conditionValue: null });
         this.load();
       },
       error: (err: { error?: { title?: string } }) => {

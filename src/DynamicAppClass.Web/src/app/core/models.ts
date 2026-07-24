@@ -45,10 +45,12 @@ export interface ClassStatus {
 export interface ClassAction {
   id: number;
   name: string;
-  fromStatusId: number;
-  fromStatusName: string;
-  toStatusId: number;
-  toStatusName: string;
+  assignClassFieldId: number;
+  assignFieldName: string;
+  valueToAssign: string;
+  conditionClassFieldId: number | null;
+  conditionFieldName: string | null;
+  conditionValue: string | null;
 }
 
 export interface ClassInstanceSummary {
@@ -93,8 +95,10 @@ export interface AddStatusRequest {
 
 export interface AddActionRequest {
   name: string;
-  fromStatusId: number;
-  toStatusId: number;
+  assignClassFieldId: number;
+  valueToAssign: string;
+  conditionClassFieldId: number | null;
+  conditionValue: string | null;
   concurrencyToken?: string;
 }
 

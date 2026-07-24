@@ -45,10 +45,11 @@ public static class SeedData
 
         supportTicket.Actions.AddRange(
         [
-            new ClassAction { Name = "Start Work", FromStatus = newStatus, ToStatus = inProgressStatus },
-            new ClassAction { Name = "Resolve", FromStatus = inProgressStatus, ToStatus = resolvedStatus },
-            new ClassAction { Name = "Close", FromStatus = resolvedStatus, ToStatus = closedStatus },
-            new ClassAction { Name = "Reopen", FromStatus = resolvedStatus, ToStatus = inProgressStatus }
+            new ClassAction { Name = "Prioritize", AssignClassField = priorityField, ValueToAssign = "3" }
+            //new ClassAction { Name = "Start Work", FromStatus = newStatus, ToStatus = inProgressStatus },
+            //new ClassAction { Name = "Resolve", FromStatus = inProgressStatus, ToStatus = resolvedStatus },
+            //new ClassAction { Name = "Close", FromStatus = resolvedStatus, ToStatus = closedStatus },
+            //new ClassAction { Name = "Reopen", FromStatus = resolvedStatus, ToStatus = inProgressStatus }
         ]);
 
         var instance = new ClassInstance

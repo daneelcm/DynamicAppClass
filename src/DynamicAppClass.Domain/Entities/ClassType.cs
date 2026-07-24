@@ -34,9 +34,9 @@ public sealed class ClassType : BaseEntity
 
     public void AddAction(ClassAction action)
     {
-        if (Statuses.All(status => status.Id != action.FromStatusId) || Statuses.All(status => status.Id != action.ToStatusId))
+        if (Fields.All(field => field.Id != action.AssignClassFieldId) || (action.ConditionClassFieldId.HasValue && Fields.All(field => field.Id != action.ConditionClassFieldId.Value)))
         {
-            throw new InvalidOperationException("Action statuses must belong to the class type.");
+            throw new InvalidOperationException("Action field must belong to the class type.");
         }
 
         Actions.Add(action);

@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<IClassStatusRepository, ClassStatusRepository>();
         services.AddScoped<IClassActionRepository, ClassActionRepository>();
         services.AddScoped<IClassInstanceRepository, ClassInstanceRepository>();
+        services.AddScoped<IClassInstanceFieldValueRepository, ClassInstanceFieldValueRepository>();
         return services;
     }
 }

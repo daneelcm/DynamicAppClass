@@ -23,7 +23,7 @@ import { ClassField, ClassInstanceDetail, ClassTypeDetail } from '../../core/mod
         <form class="panel" [formGroup]="form" (ngSubmit)="save()">
           <h2>Field Values</h2>
           @for (field of classType.fields; track field.id) {
-            <label>{{ field.name }} @if (field.isRequired) { <span class="required">*</span> }
+            <label><div>{{ field.name }}@if (field.isRequired) { <span class="required">*</span> }</div>
               @if (field.fieldType === 'LongText') {
                 <textarea [formControlName]="field.id"></textarea>
               } @else if (field.fieldType === 'Select') {
@@ -54,7 +54,7 @@ import { ClassField, ClassInstanceDetail, ClassTypeDetail } from '../../core/mod
           <h3>Configured Path</h3>
           <ul class="compact-list">
             @for (action of classType.actions; track action.id) {
-              <li><strong>{{ action.name }}</strong><span>{{ action.fromStatusName }} -> {{ action.toStatusName }}</span></li>
+              <li><strong>{{ action.name }}</strong><span>{{ action.assignFieldName }} -> {{ action.valueToAssign }}</span></li>
             }
           </ul>
         </div>
@@ -103,7 +103,7 @@ export class ClassInstanceDetailPage implements OnInit {
       next: instance => {
         this.instance = instance;
         this.error = '';
-        this.cdr.detectChanges();
+        this.refreshFields();
       },
       error: err => {
         this.error = err.error?.title ?? 'Unable to execute action.';
@@ -128,13 +128,7 @@ export class ClassInstanceDetailPage implements OnInit {
         this.instance = instance;
         this.api.getClassType(instance.classTypeId).subscribe(type => {
           this.classType = type;
-          const controls: Record<string, FormControl<string | null>> = {};
-          for (const field of type.fields) {
-            const value = instance.fieldValues.find(candidate => candidate.fieldId === field.id)?.value ?? '';
-            controls[field.id] = new FormControl<string | null>(value, field.isRequired ? Validators.required : []);
-          }
-          this.form = new FormGroup(controls);
-          this.cdr.detectChanges();
+          this.refreshFields();
         });
       },
       error: err => {
@@ -142,5 +136,15 @@ export class ClassInstanceDetailPage implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private refreshFields(){
+    const controls: Record<string, FormControl<string | null>> = {};
+    for (const field of this.classType?.fields ?? []) {
+      const value = this.instance?.fieldValues.find(candidate => candidate.fieldId === field.id)?.value ?? '';
+      controls[field.id] = new FormControl<string | null>(value, field.isRequired ? Validators.required : []);
+    }
+    this.form = new FormGroup(controls);
+    this.cdr.detectChanges();
   }
 }
