@@ -14,7 +14,7 @@ import { ClassField, ClassInstanceDetail, ClassTypeDetail } from '../../core/mod
           <h1>{{ instance.title }}</h1>
           <p>{{ instance.classTypeName }}</p>
         </div>
-        <span class="status-pill large">{{ instance.currentStatus.name }}</span>
+        <span class="status-pill large">{{ classType.fields.find(fv => fv.name === 'Status')?.options?.find(o => o.value === instance?.fieldValues?.find(fv => fv.fieldName === 'Status')?.value)?.caption }}</span>
       </section>
 
       @if (error) { <p class="error banner">{{ error }}</p> }
@@ -23,32 +23,37 @@ import { ClassField, ClassInstanceDetail, ClassTypeDetail } from '../../core/mod
         <form class="panel" [formGroup]="form" (ngSubmit)="save()">
           <h2>Field Values</h2>
           @for (field of classType.fields; track field.id) {
-            <label><div>{{ field.name }}@if (field.isRequired) { <span class="required">*</span> }</div>
-              @if (field.fieldType === 'LongText') {
-                <textarea [formControlName]="field.id"></textarea>
-              } @else if (field.fieldType === 'Select') {
-                <select [formControlName]="field.id">
-                  <option value="">Choose</option>
-                  @for (option of field.options; track option) { <option [value]="option.value">{{ option.caption }}</option> }
-                </select>
-              } @else if (field.fieldType === 'Boolean') {
-                <select [formControlName]="field.id"><option value="false">No</option><option value="true">Yes</option></select>
-              } @else {
-                <input [type]="inputType(field)" [formControlName]="field.id" />
-              }
-            </label>
+            @if (field.isHidden) {
+              <input type="hidden" [formControlName]="field.id" />
+            }
+            @else {
+              <label><div>{{ field.name }}@if (field.isRequired) { <span class="required">*</span> }</div>
+                @if (field.fieldType === 'LongText') {
+                  <textarea [formControlName]="field.id"></textarea>
+                } @else if (field.fieldType === 'Select') {
+                  <select [formControlName]="field.id">
+                    <option [ngValue]="null">Choose</option>
+                    @for (option of field.options; track option) { <option [value]="option.value">{{ option.caption }}</option> }
+                  </select>
+                } @else if (field.fieldType === 'Boolean') {
+                  <select [formControlName]="field.id"><option value="false">No</option><option value="true">Yes</option></select>
+                } @else {
+                  <input [type]="inputType(field)" [formControlName]="field.id" />
+                }
+              </label>
+            }
           }
           <button type="submit" [disabled]="form.invalid">Save Values</button>
         </form>
 
         <div class="panel">
           <h2>Workflow</h2>
-          <p class="muted">Available actions are based on the current status.</p>
+          <p class="muted">Available actions.</p>
           <div class="action-bar">
             @for (action of instance.availableActions; track action.id) {
               <button type="button" (click)="execute(action.id)">{{ action.name }}</button>
             } @empty {
-              <p>No actions are available from {{ instance.currentStatus.name }}.</p>
+              <p>No actions are available.</p>
             }
           </div>
           <h3>Configured Path</h3>
@@ -141,7 +146,7 @@ export class ClassInstanceDetailPage implements OnInit {
   private refreshFields(){
     const controls: Record<string, FormControl<string | null>> = {};
     for (const field of this.classType?.fields ?? []) {
-      const value = this.instance?.fieldValues.find(candidate => candidate.fieldId === field.id)?.value ?? '';
+      const value = this.instance?.fieldValues.find(candidate => candidate.fieldId === field.id)?.value ?? null;
       controls[field.id] = new FormControl<string | null>(value, field.isRequired ? Validators.required : []);
     }
     this.form = new FormGroup(controls);

@@ -27,10 +27,6 @@ public sealed class ClassTypesController(ClassWorkflowService workflowService) :
     public async Task<ActionResult<ClassTypeDetailDto>> AddField(int id, AddFieldRequest request, CancellationToken cancellationToken) =>
         Ok(await workflowService.AddFieldAsync(id, request, cancellationToken));
 
-    [HttpPost("{id:int}/statuses")]
-    public async Task<ActionResult<ClassTypeDetailDto>> AddStatus(int id, AddStatusRequest request, CancellationToken cancellationToken) =>
-        Ok(await workflowService.AddStatusAsync(id, request, cancellationToken));
-
     [HttpPost("{id:int}/actions")]
     public async Task<ActionResult<ClassTypeDetailDto>> AddAction(int id, AddActionRequest request, CancellationToken cancellationToken) =>
         Ok(await workflowService.AddActionAsync(id, request, cancellationToken));

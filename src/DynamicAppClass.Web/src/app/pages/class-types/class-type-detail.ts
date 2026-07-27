@@ -31,14 +31,18 @@ import { ClassFieldType, ClassTypeDetail } from '../../core/models';
       <section class="config-grid">
         <form class="panel" [formGroup]="fieldForm" (ngSubmit)="addField()">
           <h2>Fields</h2>
-          <label>Name <input formControlName="name" /></label>
-          <label>Type
+          <label><div>Name<span class="required">*</span></div><input formControlName="name" /></label>
+          <label><div>Type<span class="required">*</span></div>
             <select formControlName="fieldType">
               @for (type of fieldTypes; track type) { <option [value]="type">{{ type }}</option> }
             </select>
           </label>
-          <label>Sort Order <input type="number" formControlName="sortOrder" /></label>
           <label class="check"><input type="checkbox" formControlName="isRequired" /> Required</label>
+          <label class="check"><input type="checkbox" formControlName="isHidden" (change)="hiddenClick()" /> Hidden Field</label>
+          <label>Sort Order <input type="number" formControlName="sortOrder" /></label>
+          <label><div>Default Value@if (fieldForm.get('isHidden')?.value) {<span class="required">*</span>}</div>
+            <input formControlName="defaultValue" />
+          </label>
           @if (fieldForm.get('fieldType')?.value === 'Select') {
             <label>Options <input formControlName="options" placeholder="Low, Medium, High" /></label>
           }
@@ -46,18 +50,6 @@ import { ClassFieldType, ClassTypeDetail } from '../../core/models';
           <ul class="compact-list">
             @for (field of classType.fields; track field.id) {
               <li><strong>{{ field.name }}</strong><span>{{ field.fieldType }} @if (field.isRequired) { · required }</span></li>
-            }
-          </ul>
-        </form>
-
-        <form class="panel" [formGroup]="statusForm" (ngSubmit)="addStatus()">
-          <h2>Statuses</h2>
-          <label>Name <input formControlName="name" /></label>
-          <label>Sort Order <input type="number" formControlName="sortOrder" /></label>
-          <button type="submit" [disabled]="statusForm.invalid">Add Status</button>
-          <ul class="compact-list">
-            @for (status of classType.statuses; track status.id) {
-              <li><strong>{{ status.name }}</strong><span>#{{ status.sortOrder }}</span></li>
             }
           </ul>
         </form>
@@ -120,13 +112,10 @@ export class ClassTypeDetailPage implements OnInit {
     name: ['', Validators.required],
     fieldType: ['Text' as ClassFieldType, Validators.required],
     isRequired: [false],
+    isHidden: [false],
+    defaultValue: [null],
     sortOrder: [10, Validators.required],
     options: ['']
-  });
-
-  statusForm = this.fb.nonNullable.group({
-    name: ['', Validators.required],
-    sortOrder: [10, Validators.required]
   });
 
   actionForm = this.fb.nonNullable.group({
@@ -144,18 +133,20 @@ export class ClassTypeDetailPage implements OnInit {
     this.load();
   }
 
+  hiddenClick(){
+    if (this.fieldForm.get('isHidden')?.value) {
+      this.fieldForm.get('defaultValue')?.setValidators([Validators.required]);
+    } else {
+      this.fieldForm.get('defaultValue')?.clearValidators();
+    }
+    this.fieldForm.get('defaultValue')?.updateValueAndValidity();
+  }
+
   addField() {
     const raw = this.fieldForm.getRawValue();
     this.api.addField(this.id, {
       ...raw,
       options: raw.options.split(',').map(option => option.trim()).filter(Boolean),
-      concurrencyToken: this.classType?.concurrencyToken
-    }).subscribe(this.refreshObserver());
-  }
-
-  addStatus() {
-    this.api.addStatus(this.id, {
-      ...this.statusForm.getRawValue(),
       concurrencyToken: this.classType?.concurrencyToken
     }).subscribe(this.refreshObserver());
   }
@@ -194,7 +185,6 @@ export class ClassTypeDetailPage implements OnInit {
       next: () => {
         this.error = '';
         this.fieldForm.patchValue({ name: '', options: '' });
-        this.statusForm.patchValue({ name: '' });
         this.actionForm.patchValue({ name: '', valueToAssign: '', conditionClassFieldId: null, conditionValue: null });
         this.load();
       },

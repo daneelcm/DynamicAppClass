@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import {
   AddActionRequest,
   AddFieldRequest,
-  AddStatusRequest,
   ClassAction,
   ClassInstanceDetail,
   ClassInstanceSummary,
@@ -34,10 +33,6 @@ export class ApiService {
 
   addField(classTypeId: number, payload: AddFieldRequest) {
     return this.http.post<ClassTypeDetail>(`${API_BASE}/class-types/${classTypeId}/fields`, payload);
-  }
-
-  addStatus(classTypeId: number, payload: AddStatusRequest) {
-    return this.http.post<ClassTypeDetail>(`${API_BASE}/class-types/${classTypeId}/statuses`, payload);
   }
 
   addAction(classTypeId: number, payload: AddActionRequest) {

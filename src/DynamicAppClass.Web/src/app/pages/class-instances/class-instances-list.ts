@@ -28,20 +28,25 @@ import { ClassField, ClassInstanceSummary, ClassTypeDetail, ClassTypeSummary } f
         @if (selectedType) {
           <div formGroupName="fieldValues" class="dynamic-fields">
             @for (field of selectedType.fields; track field.id) {
-              <label>{{ field.name }} @if (field.isRequired) { <span class="required">*</span> }
-                @if (field.fieldType === 'LongText') {
-                  <textarea [formControlName]="field.id"></textarea>
-                } @else if (field.fieldType === 'Select') {
-                  <select [formControlName]="field.id">
-                    <option value="">Choose</option>
-                    @for (option of field.options; track option) { <option [value]="option.value">{{ option.caption }}</option> }
-                  </select>
-                } @else if (field.fieldType === 'Boolean') {
-                  <select [formControlName]="field.id"><option value="false">No</option><option value="true">Yes</option></select>
-                } @else {
-                  <input [type]="inputType(field)" [formControlName]="field.id" />
-                }
-              </label>
+              @if (field.isHidden) {
+                <input type="hidden" [formControlName]="field.id" />
+              }
+              @else {
+                <label><div>{{ field.name }}@if (field.isRequired) { <span class="required">*</span> }</div>
+                  @if (field.fieldType === 'LongText') {
+                    <textarea [formControlName]="field.id"></textarea>
+                  } @else if (field.fieldType === 'Select') {
+                    <select [formControlName]="field.id">
+                      <option [ngValue]="null">Choose</option>
+                      @for (option of field.options; track option) { <option [value]="option.value">{{ option.caption }}</option> }
+                    </select>
+                  } @else if (field.fieldType === 'Boolean') {
+                    <select [formControlName]="field.id"><option value="false">No</option><option value="true">Yes</option></select>
+                  } @else {
+                    <input [type]="inputType(field)" [formControlName]="field.id" />
+                  }
+                </label>
+              }
             }
           </div>
         }
@@ -112,7 +117,7 @@ export class ClassInstancesList implements OnInit {
         this.error = '';
         const controls: Record<string, FormControl<string | null>> = {};
         for (const field of type.fields) {
-          controls[field.id] = new FormControl<string | null>('', field.isRequired ? Validators.required : []);
+          controls[field.id] = new FormControl<string | null>(field.defaultValue, field.isRequired ? Validators.required : []);
         }
         this.form.setControl('fieldValues', new FormGroup(controls));
         this.cdr.detectChanges();

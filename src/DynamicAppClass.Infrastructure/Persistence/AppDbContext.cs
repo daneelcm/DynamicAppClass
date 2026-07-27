@@ -10,7 +10,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<ClassType> ClassTypes => Set<ClassType>();
     public DbSet<ClassField> ClassFields => Set<ClassField>();
     public DbSet<ClassFieldLookup> ClassFieldLookups => Set<ClassFieldLookup>();
-    public DbSet<ClassStatus> ClassStatuses => Set<ClassStatus>();
     public DbSet<ClassAction> ClassActions => Set<ClassAction>();
     public DbSet<ClassInstance> ClassInstances => Set<ClassInstance>();
     public DbSet<ClassInstanceFieldValue> ClassInstanceFieldValues => Set<ClassInstanceFieldValue>();
@@ -23,7 +22,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(classType => classType.Name).HasMaxLength(120).IsRequired();
             entity.Property(classType => classType.Description).HasMaxLength(1000);
             entity.HasMany(classType => classType.Fields).WithOne().HasForeignKey(field => field.ClassTypeId).OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(classType => classType.Statuses).WithOne().HasForeignKey(status => status.ClassTypeId).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(classType => classType.Actions).WithOne().HasForeignKey(action => action.ClassTypeId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -34,12 +32,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasOne(field => field.Field).WithMany().HasForeignKey(field => field.FieldId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(field => field.Options).WithOne().HasForeignKey(option => option.ClassFieldId).OnDelete(DeleteBehavior.NoAction);
             entity.Ignore(field => field.Label);
-        });
-
-        modelBuilder.Entity<ClassStatus>(entity =>
-        {
-            entity.HasKey(status => status.Id);
-            entity.Property(status => status.Name).HasMaxLength(80).IsRequired();
         });
 
         modelBuilder.Entity<ClassAction>(entity =>
@@ -55,7 +47,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(instance => instance.Id);
             entity.Property(instance => instance.Title).HasMaxLength(200).IsRequired();
             entity.HasOne(instance => instance.ClassType).WithMany().HasForeignKey(instance => instance.ClassTypeId).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(instance => instance.CurrentStatus).WithMany().HasForeignKey(instance => instance.CurrentStatusId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(instance => instance.FieldValues).WithOne().HasForeignKey(value => value.ClassInstanceId).OnDelete(DeleteBehavior.Cascade);
         });
 

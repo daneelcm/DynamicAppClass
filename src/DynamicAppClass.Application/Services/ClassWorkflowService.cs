@@ -6,8 +6,7 @@ using DynamicAppClass.Domain.Enums;
 namespace DynamicAppClass.Application.Services;
 
 public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClassInstanceRepository classInstances,
-    IClassFieldRepository classFields, IClassStatusRepository classStatuses, IClassActionRepository classActions,
-    IClassInstanceFieldValueRepository classInstanceFieldValues)
+    IClassFieldRepository classFields, IClassActionRepository classActions, IClassInstanceFieldValueRepository classInstanceFieldValues)
 {
     public async Task<IReadOnlyList<ClassTypeSummaryDto>> ListClassTypesAsync(CancellationToken cancellationToken)
     {
@@ -40,6 +39,8 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         {
             ClassTypeId = classTypeId,
             IsRequired = request.IsRequired,
+            IsHidden = request.IsHidden,
+            DefaultValue = request.DefaultValue,
             SortOrder = request.SortOrder,
             Field = new Field
             {
@@ -50,16 +51,6 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
             Options = lookups?.Select(lookup => new ClassFieldLookup { Lookup = lookup }).ToList() ?? []
         }, cancellationToken);
         await classFields.SaveChangesAsync(cancellationToken);
-        return MapDetail(classType);
-    }
-
-    public async Task<ClassTypeDetailDto> AddStatusAsync(int classTypeId, AddStatusRequest request, CancellationToken cancellationToken)
-    {
-        ValidateText(request.Name, "Status name");
-        var classType = await RequireClassType(classTypeId, cancellationToken);
-        ValidateConcurrencyToken(classType.ConcurrencyToken, request.ConcurrencyToken);
-        await classStatuses.AddAsync(new ClassStatus { ClassTypeId = classTypeId, Name = request.Name.Trim(), SortOrder = request.SortOrder }, cancellationToken);
-        await classStatuses.SaveChangesAsync(cancellationToken);
         return MapDetail(classType);
     }
 
@@ -99,7 +90,6 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
     public async Task<ClassInstanceDetailDto> CreateInstanceAsync(CreateClassInstanceRequest request, CancellationToken cancellationToken)
     {
         var classType = await RequireClassType(request.ClassTypeId, cancellationToken);
-        var initialStatus = classType.InitialStatus ?? throw new InvalidOperationException("Class type must have at least one status before instances can be created.");
         ValidateFieldValues(classType, request.FieldValues);
 
         var title = string.IsNullOrWhiteSpace(request.Title)
@@ -109,7 +99,6 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         var instance = new ClassInstance
         {
             ClassTypeId = classType.Id,
-            CurrentStatusId = initialStatus.Id,
             Title = title,
             FieldValues = request.FieldValues.Select(pair => new ClassInstanceFieldValue { ClassFieldId = pair.Key, Value = pair.Value }).ToList()
         };
@@ -217,16 +206,13 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
     }
 
     private static ClassTypeSummaryDto MapSummary(ClassType classType) =>
-        new(classType.Id, classType.Name, classType.Description, classType.Fields.Count, classType.Statuses.Count, classType.Actions.Count, classType.ConcurrencyToken);
+        new(classType.Id, classType.Name, classType.Description, classType.Fields.Count, classType.Actions.Count, classType.ConcurrencyToken);
 
     private static ClassTypeDetailDto MapDetail(ClassType classType) =>
-        new(classType.Id, classType.Name, classType.Description, classType.Fields.OrderBy(field => field.SortOrder).Select(MapField).ToList(), classType.Statuses.OrderBy(status => status.SortOrder).Select(MapStatus).ToList(), classType.Actions.Select(action => MapAction(action, classType)).ToList(), classType.ConcurrencyToken);
+        new(classType.Id, classType.Name, classType.Description, [.. classType.Fields.OrderBy(field => field.SortOrder).Select(MapField)], [.. classType.Actions.Select(action => MapAction(action, classType))], classType.ConcurrencyToken);
 
     private static ClassFieldDto MapField(ClassField field) =>
-        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.SortOrder, [..field.Options?.OrderBy(x => x.SortOrder).Select(x => new FieldOptionsDto(x.Value, x.Caption)) ?? []]);
-
-    private static ClassStatusDto MapStatus(ClassStatus status) =>
-        new(status.Id, status.Name, status.SortOrder);
+        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.IsHidden, field.DefaultValue, field.SortOrder, [..field.Options?.OrderBy(x => x.SortOrder).Select(x => new FieldOptionsDto(x.Value, x.Caption)) ?? []]);
 
     private static ClassActionDto MapAction(ClassAction action, ClassType classType)
     {
@@ -243,17 +229,17 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
 
     private static ClassInstanceSummaryDto MapInstanceSummary(ClassInstance instance, ClassType classType)
     {
-        var status = classType.Statuses.Single(candidate => candidate.Id == instance.CurrentStatusId);
-        return new(instance.Id, classType.Id, classType.Name, instance.Title, status.Id, status.Name, instance.CreatedAt, instance.UpdatedAt, instance.ConcurrencyToken);
+        var statusField = classType.Fields.First(x => x.Field.Name == "Status");
+        var statusVal = instance.FieldValues.First(fv => fv.ClassFieldId == statusField.Id).Value;
+        return new(instance.Id, classType.Id, classType.Name, instance.Title, statusField.Options.First(x => x.Value == statusVal).Caption, instance.CreatedAt, instance.UpdatedAt, instance.ConcurrencyToken);
     }
 
     private static ClassInstanceDetailDto MapInstanceDetail(ClassInstance instance, ClassType classType)
     {
-        var status = classType.Statuses.Single(candidate => candidate.Id == instance.CurrentStatusId);
         var values = classType.Fields.OrderBy(field => field.SortOrder)
             .Select(field => new ClassInstanceFieldValueDto(field.Id, field.Label, instance.FieldValues.SingleOrDefault(value => value.ClassFieldId == field.Id)?.Value))
             .ToList();
 
-        return new(instance.Id, classType.Id, classType.Name, instance.Title, MapStatus(status), values, instance.GetAvailableActions(classType).Select(action => MapAction(action, classType)).ToList(), instance.CreatedAt, instance.UpdatedAt, instance.ConcurrencyToken);
+        return new(instance.Id, classType.Id, classType.Name, instance.Title, values, instance.GetAvailableActions(classType).Select(action => MapAction(action, classType)).ToList(), instance.CreatedAt, instance.UpdatedAt, instance.ConcurrencyToken);
     }
 }

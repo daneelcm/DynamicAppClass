@@ -15,7 +15,6 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
         services.AddScoped<IClassTypeRepository, ClassTypeRepository>();
         services.AddScoped<IClassFieldRepository, ClassFieldRepository>();
-        services.AddScoped<IClassStatusRepository, ClassStatusRepository>();
         services.AddScoped<IClassActionRepository, ClassActionRepository>();
         services.AddScoped<IClassInstanceRepository, ClassInstanceRepository>();
         services.AddScoped<IClassInstanceFieldValueRepository, ClassInstanceFieldValueRepository>();

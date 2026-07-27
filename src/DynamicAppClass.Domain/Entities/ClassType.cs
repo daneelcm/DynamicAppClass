@@ -7,10 +7,7 @@ public sealed class ClassType : BaseEntity
     public Guid ConcurrencyToken { get; set; } = Guid.NewGuid();
 
     public List<ClassField> Fields { get; set; } = [];
-    public List<ClassStatus> Statuses { get; set; } = [];
     public List<ClassAction> Actions { get; set; } = [];
-
-    public ClassStatus? InitialStatus => Statuses.OrderBy(status => status.SortOrder).FirstOrDefault();
 
     public void AddField(ClassField field)
     {
@@ -20,16 +17,6 @@ public sealed class ClassType : BaseEntity
         }
 
         Fields.Add(field);
-    }
-
-    public void AddStatus(ClassStatus status)
-    {
-        if (Statuses.Any(existing => string.Equals(existing.Name, status.Name, StringComparison.OrdinalIgnoreCase)))
-        {
-            throw new InvalidOperationException($"A status named '{status.Name}' already exists.");
-        }
-
-        Statuses.Add(status);
     }
 
     public void AddAction(ClassAction action)
