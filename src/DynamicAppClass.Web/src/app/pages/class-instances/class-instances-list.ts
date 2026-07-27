@@ -31,7 +31,7 @@ import { ClassField, ClassInstanceSummary, ClassTypeDetail, ClassTypeSummary } f
               @if (field.isHidden) {
                 <input type="hidden" [formControlName]="field.id" />
               }
-              @else {
+            @else if ((field.dependsOnClassFieldId ?? 0) === 0 || form.get('fieldValues.' + field.dependsOnClassFieldId)?.value == field.dependsOnClassFieldValue) {
                 <label><div>{{ field.name }}@if (field.isRequired) { <span class="required">*</span> }</div>
                   @if (field.fieldType === 'LongText') {
                     <textarea [formControlName]="field.id"></textarea>
@@ -117,7 +117,23 @@ export class ClassInstancesList implements OnInit {
         this.error = '';
         const controls: Record<string, FormControl<string | null>> = {};
         for (const field of type.fields) {
-          controls[field.id] = new FormControl<string | null>(field.defaultValue, field.isRequired ? Validators.required : []);
+          controls[field.id] = new FormControl<string | null>(field.defaultValue, (field.isRequired && (field.dependsOnClassFieldId ?? 0) == 0) ? Validators.required : []);
+
+          //if somebody depends on this field will suscribe to the change event to evaluate required or not for the dependant fields
+          if (type.fields.some(f => f.dependsOnClassFieldId === field.id)) {
+            controls[field.id].valueChanges.subscribe((value) => {
+              type.fields.filter(f => f.dependsOnClassFieldId === field.id).forEach(x => {
+                if (x.dependsOnClassFieldValue == value){
+                  if (x.isRequired)
+                    controls[x.id].setValidators(Validators.required);
+                }
+                else{
+                  controls[x.id].clearValidators();
+                  controls[x.id].setValue(null);
+                }
+              });
+            });
+          }
         }
         this.form.setControl('fieldValues', new FormGroup(controls));
         this.cdr.detectChanges();

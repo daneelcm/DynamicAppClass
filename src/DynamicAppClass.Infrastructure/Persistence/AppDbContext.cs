@@ -30,6 +30,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(field => field.Id);
             entity.Property(field => field.OverrideName).HasMaxLength(120);
             entity.HasOne(field => field.Field).WithMany().HasForeignKey(field => field.FieldId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(field => field.DependsOnClassField).WithMany().HasForeignKey(field => field.DependsOnClassFieldId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(field => field.Options).WithOne().HasForeignKey(option => option.ClassFieldId).OnDelete(DeleteBehavior.NoAction);
             entity.Ignore(field => field.Label);
         });

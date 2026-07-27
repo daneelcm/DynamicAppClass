@@ -30,6 +30,9 @@ public static class SeedData
         var materialBricks = new Lookup { Value = "2", Caption = "Bricks", SortOrder = 20 };
         var materialMetal = new Lookup { Value = "3", Caption = "Metal", SortOrder = 30 };
 
+        var brickTypeConcrete = new Lookup { Value = "1", Caption = "Concrete", SortOrder = 10 };
+        var brickTypeClay = new Lookup { Value = "2", Caption = "Clay", SortOrder = 20 };
+
         //var ticketField = new ClassField { Field = new Field { Name = "Title", FieldType = ClassFieldType.Sequence }, IsRequired = true, SortOrder = 0 };
         var titleField = new ClassField { Field = new Field { Name = "Title", FieldType = ClassFieldType.Text }, IsRequired = true, SortOrder = 10 };
         var descriptionField = new ClassField { OverrideName = "Work Description", Field = new Field { Name = "Description", FieldType = ClassFieldType.LongText }, IsRequired = true, SortOrder = 20 };
@@ -41,7 +44,7 @@ public static class SeedData
                 new() { Lookup = lookupRejected }
             ]
         };
-        var materialField = new ClassField { 
+        var materialField = new ClassField {
             Field = new Field { Name = "Materials", FieldType = ClassFieldType.Select, Options = [ materialWood, materialBricks, materialMetal ] },
             IsRequired = false, SortOrder = 30, Options = [ 
                 new() { Lookup = materialWood },
@@ -49,7 +52,14 @@ public static class SeedData
                 new() { Lookup = materialMetal }
             ]
         };
-        supportTicket.Fields.AddRange([statusField, titleField, descriptionField, materialField]);
+        var brickTypeField = new ClassField {
+            Field = new Field { Name = "Brick Type", FieldType = ClassFieldType.Select, Options = [ brickTypeConcrete, brickTypeClay ] },
+            IsRequired = true, SortOrder = 40, DependsOnClassField = materialField, DependsOnClassFieldValue = "2", Options = [ 
+                new() { Lookup = brickTypeConcrete },
+                new() { Lookup = brickTypeClay }
+            ]
+        };
+        supportTicket.Fields.AddRange([statusField, titleField, descriptionField, materialField, brickTypeField]);
 
         supportTicket.Actions.AddRange(
         [

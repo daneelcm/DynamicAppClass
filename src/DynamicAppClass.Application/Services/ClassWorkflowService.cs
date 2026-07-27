@@ -42,6 +42,8 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
             IsHidden = request.IsHidden,
             DefaultValue = request.DefaultValue,
             SortOrder = request.SortOrder,
+            DependsOnClassFieldId = request.DependsOnClassFieldId,
+            DependsOnClassFieldValue = request.DependsOnClassFieldValue,
             Field = new Field
             {
                 Name = request.Name.Trim(),
@@ -177,6 +179,10 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
 
         foreach (var field in classType.Fields.Where(field => field.IsRequired))
         {
+            if (field.DependsOnClassFieldId > 0 && values.TryGetValue(field.DependsOnClassFieldId.Value, out var depVal) && depVal != field.DependsOnClassFieldValue)
+            {
+                continue;
+            }
             if (!values.TryGetValue(field.Id, out var value) || string.IsNullOrWhiteSpace(value))
             {
                 throw new InvalidOperationException($"Field '{field.Label}' is required.");
@@ -212,7 +218,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         new(classType.Id, classType.Name, classType.Description, [.. classType.Fields.OrderBy(field => field.SortOrder).Select(MapField)], [.. classType.Actions.Select(action => MapAction(action, classType))], classType.ConcurrencyToken);
 
     private static ClassFieldDto MapField(ClassField field) =>
-        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.IsHidden, field.DefaultValue, field.SortOrder, [..field.Options?.OrderBy(x => x.SortOrder).Select(x => new FieldOptionsDto(x.Value, x.Caption)) ?? []]);
+        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.IsHidden, field.DefaultValue, field.SortOrder, field.DependsOnClassFieldId, field.DependsOnClassFieldValue, [..field.Options?.OrderBy(x => x.SortOrder).Select(x => new FieldOptionsDto(x.Value, x.Caption)) ?? []]);
 
     private static ClassActionDto MapAction(ClassAction action, ClassType classType)
     {

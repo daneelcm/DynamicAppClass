@@ -31,6 +31,8 @@ export interface ClassField {
   isHidden: boolean;
   defaultValue: string | null;
   sortOrder: number;
+  dependsOnClassFieldId: number | null;
+  dependsOnClassFieldValue: string | null;
   options: FieldOptions[];
 }
 

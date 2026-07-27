@@ -46,23 +46,49 @@ import { ClassFieldType, ClassTypeDetail } from '../../core/models';
           @if (fieldForm.get('fieldType')?.value === 'Select') {
             <label>Options <input formControlName="options" placeholder="Low, Medium, High" /></label>
           }
+          <label>Depends On Field
+            <select formControlName="dependsOnClassFieldId">
+              @for (field of classType.fields; track field.id) { <option [value]="field.id">{{ field.name }}</option> }
+            </select>
+          </label>
+          @if ((fieldForm.get('dependsOnClassFieldId')?.value ?? 0) > 0) {
+            @let f = classType.fields.find(x => x.id == fieldForm.get('dependsOnClassFieldId')!.value)!;
+            @if (f?.fieldType == 'Select'){
+              <select formControlName="dependsOnClassFieldValue">
+                @for (opt of f?.options; track opt) { <option [value]="opt.value">{{ opt.caption }}</option> }
+              </select>
+            }
+            @else {
+              <label>Depends On Value <input formControlName="dependsOnClassFieldValue" /></label>
+            }
+          }
           <button type="submit" [disabled]="fieldForm.invalid">Add Field</button>
           <ul class="compact-list">
             @for (field of classType.fields; track field.id) {
-              <li><strong>{{ field.name }}</strong><span>{{ field.fieldType }} @if (field.isRequired) { · required }</span></li>
+              <li><strong>{{ field.name }}</strong>
+                <span>
+                  {{ field.fieldType }}
+                  @if (field.isRequired) { · required }
+                  @if ((field.dependsOnClassFieldId ?? 0) > 0) {
+                    @let f = classType.fields.find(x => x.id == field.dependsOnClassFieldId)!;
+                    | WHEN: {{f?.name }} = 
+                    {{ f?.fieldType == 'Select' ? f?.options.find(o => o.value == field.dependsOnClassFieldValue)?.caption : field.dependsOnClassFieldValue }}
+                  }
+                </span>
+              </li>
             }
           </ul>
         </form>
 
         <form class="panel" [formGroup]="actionForm" (ngSubmit)="addAction()">
           <h2>Actions</h2>
-          <label>Name <input formControlName="name" /></label>
-          <label>Field
-            <select formControlName="assignClassFieldId">
+          <label><div>Name<span class="required">*</span></div><input formControlName="name" /></label>
+          <label><div>Field<span class="required">*</span></div>
+            <select formControlName="assignClassFieldId" (change)="actionForm.get('valueToAssign')?.setValue('');">
               @for (field of classType.fields; track field.id) { <option [value]="field.id">{{ field.name }}</option> }
             </select>
           </label>
-          <label>New Value
+          <label><div>New Value<span class="required">*</span></div>
             @if (classType.fields.find(f => f.id == actionForm.get('assignClassFieldId')?.value)?.fieldType === 'Select') {
               <select formControlName="valueToAssign">
                 @for (opt of classType.fields.find(f => f.id == actionForm.get('assignClassFieldId')?.value)?.options; track opt) { <option [value]="opt.value">{{ opt.caption }}</option> }
@@ -115,6 +141,8 @@ export class ClassTypeDetailPage implements OnInit {
     isHidden: [false],
     defaultValue: [null],
     sortOrder: [10, Validators.required],
+    dependsOnClassFieldId: [null],
+    dependsOnClassFieldValue: [null],
     options: ['']
   });
 
@@ -168,8 +196,6 @@ export class ClassTypeDetailPage implements OnInit {
         this.error = '';
         this.isLoading = false;
         this.cdr.detectChanges();
-        // const firstStatus = type.statuses[0]?.id ?? '';
-        // this.actionForm.patchValue({ assignClassFieldId: firstStatus, toStatusId: firstStatus });
       },
       error: err => {
         console.log('API error:', err);
@@ -184,8 +210,8 @@ export class ClassTypeDetailPage implements OnInit {
     return {
       next: () => {
         this.error = '';
-        this.fieldForm.patchValue({ name: '', options: '' });
-        this.actionForm.patchValue({ name: '', valueToAssign: '', conditionClassFieldId: null, conditionValue: null });
+        this.fieldForm.reset();
+        this.actionForm.reset();
         this.load();
       },
       error: (err: { error?: { title?: string } }) => {

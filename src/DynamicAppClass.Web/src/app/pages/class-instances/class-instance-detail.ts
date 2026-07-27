@@ -26,7 +26,7 @@ import { ClassField, ClassInstanceDetail, ClassTypeDetail } from '../../core/mod
             @if (field.isHidden) {
               <input type="hidden" [formControlName]="field.id" />
             }
-            @else {
+            @else if ((field.dependsOnClassFieldId ?? 0) === 0 || form.get(field.dependsOnClassFieldId!.toString())?.value == field.dependsOnClassFieldValue) {
               <label><div>{{ field.name }}@if (field.isRequired) { <span class="required">*</span> }</div>
                 @if (field.fieldType === 'LongText') {
                   <textarea [formControlName]="field.id"></textarea>
@@ -147,7 +147,23 @@ export class ClassInstanceDetailPage implements OnInit {
     const controls: Record<string, FormControl<string | null>> = {};
     for (const field of this.classType?.fields ?? []) {
       const value = this.instance?.fieldValues.find(candidate => candidate.fieldId === field.id)?.value ?? null;
-      controls[field.id] = new FormControl<string | null>(value, field.isRequired ? Validators.required : []);
+      controls[field.id] = new FormControl<string | null>(value, (field.isRequired && (field.dependsOnClassFieldId ?? 0) == 0) ? Validators.required : []);
+
+      //if somebody depends on this field will suscribe to the change event to evaluate required or not for the dependant fields
+      if (this.classType?.fields.some(f => f.dependsOnClassFieldId === field.id)) {
+        controls[field.id].valueChanges.subscribe((value) => {
+          this.classType?.fields.filter(f => f.dependsOnClassFieldId === field.id).forEach(x => {
+            if (x.dependsOnClassFieldValue == value){
+              if (x.isRequired)
+                controls[x.id].setValidators(Validators.required);
+            }
+            else{
+              controls[x.id].clearValidators();
+              controls[x.id].setValue(null);
+            }
+          });
+        });
+      }
     }
     this.form = new FormGroup(controls);
     this.cdr.detectChanges();
