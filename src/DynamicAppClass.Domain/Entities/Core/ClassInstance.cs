@@ -35,8 +35,13 @@ public sealed class ClassInstance : BaseEntity
                 throw new InvalidOperationException("The requested action is not valid for the instance's current value.");
         }
 
-        var assignField = FieldValues.Single(fv => fv.ClassFieldId == action.AssignClassFieldId) ??
-            throw new InvalidOperationException("The requested action is not valid for the field of this instance's");
+        var assignField = FieldValues.SingleOrDefault(fv => fv.ClassFieldId == action.AssignClassFieldId);
+        
+        if (assignField is null)
+        {
+            assignField = new ClassInstanceFieldValue { ClassInstanceId = Id, ClassFieldId = action.AssignClassFieldId };
+            FieldValues.Add(assignField);
+        }
 
         assignField.Value = action.ValueToAssign;
         UpdatedAt = DateTime.UtcNow;
