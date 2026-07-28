@@ -1,4 +1,4 @@
-using DynamicAppClass.Domain.Entities;
+using DynamicAppClass.Domain.Entities.Core;
 using Microsoft.EntityFrameworkCore;
 
 namespace DynamicAppClass.Infrastructure.Persistence;
@@ -31,7 +31,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(field => field.OverrideName).HasMaxLength(120);
             entity.HasOne(field => field.Field).WithMany().HasForeignKey(field => field.FieldId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(field => field.DependsOnClassField).WithMany().HasForeignKey(field => field.DependsOnClassFieldId).OnDelete(DeleteBehavior.Restrict);
-            entity.HasMany(field => field.Options).WithOne().HasForeignKey(option => option.ClassFieldId).OnDelete(DeleteBehavior.NoAction);
+            entity.HasMany(field => field.Options).WithOne().HasForeignKey(option => option.ClassFieldId).OnDelete(DeleteBehavior.Cascade);
             entity.Ignore(field => field.Label);
         });
 
@@ -39,8 +39,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         {
             entity.HasKey(action => action.Id);
             entity.Property(action => action.Name).HasMaxLength(80).IsRequired();
-            entity.HasOne(action => action.AssignClassField).WithMany().HasForeignKey(action => action.AssignClassFieldId).OnDelete(DeleteBehavior.NoAction);
-            entity.HasOne(action => action.ConditionClassField).WithMany().HasForeignKey(action => action.ConditionClassFieldId).OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(action => action.AssignClassField).WithMany().HasForeignKey(action => action.AssignClassFieldId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(action => action.ConditionClassField).WithMany().HasForeignKey(action => action.ConditionClassFieldId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ClassInstance>(entity =>
@@ -78,7 +78,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(option => option.Id);
             entity.Property(option => option.OverrideValue).HasMaxLength(120);
             entity.Property(option => option.OverrideCaption).HasMaxLength(400);
-            entity.HasOne(option => option.Lookup).WithMany().HasForeignKey(option => option.LookupId).OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(option => option.Lookup).WithMany().HasForeignKey(option => option.LookupId).OnDelete(DeleteBehavior.Restrict);
             entity.Ignore(option => option.Value);
             entity.Ignore(option => option.Caption);
             entity.Ignore(option => option.SortOrder);

@@ -1,5 +1,5 @@
 using DynamicAppClass.Application.Interfaces;
-using DynamicAppClass.Domain.Entities;
+using DynamicAppClass.Domain.Entities.Core;
 using DynamicAppClass.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

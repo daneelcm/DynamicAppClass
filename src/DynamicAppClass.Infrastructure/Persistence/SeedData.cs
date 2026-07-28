@@ -1,4 +1,4 @@
-using DynamicAppClass.Domain.Entities;
+using DynamicAppClass.Domain.Entities.Core;
 using DynamicAppClass.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 

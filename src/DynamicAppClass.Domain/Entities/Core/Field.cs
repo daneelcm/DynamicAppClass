@@ -1,6 +1,6 @@
 using DynamicAppClass.Domain.Enums;
 
-namespace DynamicAppClass.Domain.Entities;
+namespace DynamicAppClass.Domain.Entities.Core;
 
 public sealed class Field : BaseEntity
 {

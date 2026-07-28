@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DynamicAppClass.Domain.Entities
+namespace DynamicAppClass.Domain.Entities.Core
 {
     public sealed class ClassFieldLookup : BaseEntity
     {
