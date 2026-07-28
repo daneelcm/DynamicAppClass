@@ -13,6 +13,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<ClassAction> ClassActions => Set<ClassAction>();
     public DbSet<ClassInstance> ClassInstances => Set<ClassInstance>();
     public DbSet<ClassInstanceFieldValue> ClassInstanceFieldValues => Set<ClassInstanceFieldValue>();
+    public DbSet<Feature> Features => Set<Feature>();
+    public DbSet<ClassTypeFeature> ClassTypeFeatures => Set<ClassTypeFeature>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,6 +25,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(classType => classType.Description).HasMaxLength(1000);
             entity.HasMany(classType => classType.Fields).WithOne().HasForeignKey(field => field.ClassTypeId).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(classType => classType.Actions).WithOne().HasForeignKey(action => action.ClassTypeId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(classType => classType.Features).WithOne().HasForeignKey(feature => feature.ClassTypeId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ClassField>(entity =>
@@ -46,7 +49,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         modelBuilder.Entity<ClassInstance>(entity =>
         {
             entity.HasKey(instance => instance.Id);
-            entity.Property(instance => instance.Title).HasMaxLength(200).IsRequired();
             entity.HasOne(instance => instance.ClassType).WithMany().HasForeignKey(instance => instance.ClassTypeId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(instance => instance.FieldValues).WithOne().HasForeignKey(value => value.ClassInstanceId).OnDelete(DeleteBehavior.Cascade);
         });
@@ -82,6 +84,19 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Ignore(option => option.Value);
             entity.Ignore(option => option.Caption);
             entity.Ignore(option => option.SortOrder);
+        });
+
+        modelBuilder.Entity<Feature>(entity =>
+        {
+            entity.HasKey(feature => feature.Id);
+            entity.Property(feature => feature.Code).HasMaxLength(20).IsRequired();
+            entity.Property(feature => feature.Name).HasMaxLength(120).IsRequired();
+        });
+
+        modelBuilder.Entity<ClassTypeFeature>(entity =>
+        {
+            entity.HasKey(classFeature => classFeature.Id);
+            entity.HasOne(classFeature => classFeature.Feature).WithMany().HasForeignKey(classFeature => classFeature.FeatureId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

@@ -30,4 +30,8 @@ public sealed class ClassTypesController(ClassWorkflowService workflowService) :
     [HttpPost("{id:int}/actions")]
     public async Task<ActionResult<ClassTypeDetailDto>> AddAction(int id, AddActionRequest request, CancellationToken cancellationToken) =>
         Ok(await workflowService.AddActionAsync(id, request, cancellationToken));
+
+    [HttpPut("{id:int}/feature")]
+    public async Task<ActionResult<ClassTypeDetailDto>> UpdateFeature(int id, ClassFeatureRequest request, CancellationToken cancellationToken) =>
+        Ok(await workflowService.UpdateFeatureAsync(id, request, cancellationToken));
 }

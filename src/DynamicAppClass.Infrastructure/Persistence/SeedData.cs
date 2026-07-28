@@ -15,7 +15,7 @@ public static class SeedData
             return;
         }
 
-        var supportTicket = new ClassType
+        var clx = new ClassType
         {
             Name = "CLX",
             Description = "Class X Application Process example."
@@ -59,9 +59,9 @@ public static class SeedData
                 new() { Lookup = brickTypeClay }
             ]
         };
-        supportTicket.Fields.AddRange([statusField, titleField, descriptionField, materialField, brickTypeField]);
+        clx.Fields.AddRange([statusField, titleField, descriptionField, materialField, brickTypeField]);
 
-        supportTicket.Actions.AddRange(
+        clx.Actions.AddRange(
         [
             new ClassAction { Name = "Issue", AssignClassField = statusField, ValueToAssign = "2", ConditionClassField = statusField, ConditionValue = "1" },
             new ClassAction { Name = "Reject", AssignClassField = statusField, ValueToAssign = "3", ConditionClassField = statusField, ConditionValue = "1" },
@@ -70,18 +70,22 @@ public static class SeedData
 
         var instance = new ClassInstance
         {
-            ClassType = supportTicket,
-            Title = "Fence Fix",
+            ClassType = clx,
             FieldValues =
             [
-                new ClassInstanceFieldValue { ClassField = titleField, Value = "Fence work" },
+                new ClassInstanceFieldValue { ClassField = titleField, Value = "Fence Fix" },
                 new ClassInstanceFieldValue { ClassField = descriptionField, Value = "We are going to fix the fence." },
                 new ClassInstanceFieldValue { ClassField = statusField, Value = "1" },
                 new ClassInstanceFieldValue { ClassField = materialField, Value = "1" }
             ]
         };
 
-        dbContext.ClassTypes.Add(supportTicket);
+        dbContext.Features.AddRange(
+            new Feature { Name = "Address", Code = "address" },
+            new Feature { Name = "Contacts", Code = "contacts" },
+            new Feature { Name = "Documents", Code = "documents" }
+        );
+        dbContext.ClassTypes.Add(clx);
         dbContext.ClassInstances.Add(instance);
         await dbContext.SaveChangesAsync(cancellationToken);
     }

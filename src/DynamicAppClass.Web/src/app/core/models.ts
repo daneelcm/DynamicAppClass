@@ -20,6 +20,7 @@ export interface ClassTypeDetail {
   description: string;
   fields: ClassField[];
   actions: ClassAction[];
+  features: ClassFeature[];
   concurrencyToken?: string;
 }
 
@@ -34,6 +35,19 @@ export interface ClassField {
   dependsOnClassFieldId: number | null;
   dependsOnClassFieldValue: string | null;
   options: FieldOptions[];
+}
+
+export interface ClassFeature {
+  id: number;
+  code: string;
+  name: string;
+  isEnabled: boolean;
+}
+
+export interface UpdateFeatureRequest {
+  id: number;
+  isEnabled: boolean;
+  concurrencyToken?: string;
 }
 
 export interface ClassAction {

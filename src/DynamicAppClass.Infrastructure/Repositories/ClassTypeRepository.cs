@@ -28,5 +28,7 @@ public sealed class ClassTypeRepository(AppDbContext dbContext) : IClassTypeRepo
             .Include(classType => classType.Fields)
                 .ThenInclude(cf => cf.Options)
                 .ThenInclude(co => co.Lookup)
-            .Include(classType => classType.Actions);
+            .Include(classType => classType.Actions)
+            .Include(classType => classType.Features)
+                .ThenInclude(feat => feat.Feature);
 }

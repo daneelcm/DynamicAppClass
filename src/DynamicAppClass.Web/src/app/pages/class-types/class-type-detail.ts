@@ -3,10 +3,11 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ClassFieldType, ClassTypeDetail } from '../../core/models';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-class-type-detail',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   template: `
     @if (!classType && isLoading) {
       <div style="padding: 20px; background: #fff3cd; border: 1px solid #ffc107;">
@@ -119,6 +120,18 @@ import { ClassFieldType, ClassTypeDetail } from '../../core/models';
             }
           </ul>
         </form>
+
+        <div class="panel">
+          <h2>Features</h2>
+          @for (feat of classType.features; track feat.id) {
+            <label class="check" style="justify-content: space-between;">
+              <span style="padding: 10px;"><input type="checkbox" (change)="featureEvent(feat.id, $event)" [checked]="feat.isEnabled" /> {{ feat.name }}</span>
+              @if (feat.isEnabled){
+                <a class="row-link" [routerLink]="['/class-types', classType.id, 'config-' + feat.code]" style="padding: 9px;">Configure</a>
+              }
+            </label>
+          }
+        </div>
       </section>
     }
   `
@@ -159,6 +172,16 @@ export class ClassTypeDetailPage implements OnInit {
     this.id = Number.parseInt(this.route.snapshot.paramMap.get('id') ?? '0');
     console.log('Got id:', this.id);
     this.load();
+  }
+
+  featureEvent(id: number, $event: Event) {
+    const checkbox = $event.target as HTMLInputElement;
+    this.isLoading = true;
+    this.api.updateFeature(this.id, {
+      id: id,
+      isEnabled: checkbox.checked,
+      concurrencyToken: this.classType?.concurrencyToken
+    }).subscribe(this.refreshObserver());
   }
 
   hiddenClick(){
@@ -208,11 +231,13 @@ export class ClassTypeDetailPage implements OnInit {
 
   private refreshObserver() {
     return {
-      next: () => {
+      next: (type: ClassTypeDetail) => {
         this.error = '';
         this.fieldForm.reset();
         this.actionForm.reset();
-        this.load();
+        this.classType = type;
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err: { error?: { title?: string } }) => {
         this.error = err.error?.title ?? 'Unable to save change.';

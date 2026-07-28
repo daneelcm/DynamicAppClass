@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import {
   AddActionRequest,
   AddFieldRequest,
+  UpdateFeatureRequest,
   ClassAction,
   ClassInstanceDetail,
   ClassInstanceSummary,
@@ -37,6 +38,10 @@ export class ApiService {
 
   addAction(classTypeId: number, payload: AddActionRequest) {
     return this.http.post<ClassTypeDetail>(`${API_BASE}/class-types/${classTypeId}/actions`, payload);
+  }
+
+  updateFeature(classTypeId: number, payload: UpdateFeatureRequest) {
+    return this.http.put<ClassTypeDetail>(`${API_BASE}/class-types/${classTypeId}/feature`, payload);
   }
 
   listInstances() {
