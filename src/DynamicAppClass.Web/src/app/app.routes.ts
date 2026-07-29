@@ -9,7 +9,7 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'instances' },
   { path: 'class-types', component: ClassTypesList },
   { path: 'class-types/:id', component: ClassTypeDetailPage },
-  { path: 'class-types/:typeId/config-contacts', component: ConfigContactsPage },
+  { path: 'class-types/:typeId/config-contacts/:id', component: ConfigContactsPage },
   { path: 'instances', component: ClassInstancesList },
   { path: 'instances/:id', component: ClassInstanceDetailPage },
   { path: '**', redirectTo: 'instances' }

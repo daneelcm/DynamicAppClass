@@ -20,6 +20,9 @@ public sealed class ClassTypeFeatureRepository(AppDbContext dbContext) : IClassT
 
     public void Update(ClassTypeFeature classTypeFeature) => dbContext.ClassTypeFeatures.Update(classTypeFeature);
 
+    public async Task<ClassTypeFeature?> GetAsync(int typeId, int id, CancellationToken cancellationToken) =>
+        await dbContext.ClassTypeFeatures.SingleOrDefaultAsync(classTypeFeature => classTypeFeature.ClassTypeId == typeId && classTypeFeature.FeatureId == id, cancellationToken);
+
     public Task SaveChangesAsync(CancellationToken cancellationToken) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }

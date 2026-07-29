@@ -2,12 +2,13 @@ using DynamicAppClass.Application.Dtos;
 using DynamicAppClass.Application.Interfaces;
 using DynamicAppClass.Domain.Entities.Core;
 using DynamicAppClass.Domain.Enums;
+using Newtonsoft.Json;
 
 namespace DynamicAppClass.Application.Services;
 
 public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClassInstanceRepository classInstances,
     IClassFieldRepository classFields, IClassActionRepository classActions, IClassInstanceFieldValueRepository classInstanceFieldValues,
-    IFeatureRepository features, IClassTypeFeatureRepository classFeatures)
+    IFeatureRepository features, IClassTypeFeatureRepository classTypeFeatures)
 {
     public async Task<IReadOnlyList<ClassTypeSummaryDto>> ListClassTypesAsync(CancellationToken cancellationToken)
     {
@@ -19,6 +20,14 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
     {
         var classType = await RequireClassType(id, cancellationToken);
         return await MapDetailAsync(classType, cancellationToken);
+    }
+
+    public async Task<string?> GetFeatureConfigurationAsync(int typeId, int featureId, CancellationToken cancellationToken)
+    {
+        var classTypeFeature = await classTypeFeatures.GetAsync(typeId, featureId, cancellationToken) ??
+            throw new InvalidOperationException($"FeatureId {featureId} for Class Type {typeId} not enabled yet.");
+
+        return classTypeFeature.ConfigJson;
     }
 
     public async Task<ClassTypeDetailDto> CreateClassTypeAsync(CreateClassTypeRequest request, CancellationToken cancellationToken)
@@ -76,19 +85,19 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         return await MapDetailAsync(classType, cancellationToken);
     }
 
-    public async Task<ClassTypeDetailDto> UpdateFeatureAsync(int classTypeId, ClassFeatureRequest request, CancellationToken cancellationToken)
+    public async Task<ClassTypeDetailDto> UpdateFeatureAsync(int classTypeId, ClassTypeFeatureRequest request, CancellationToken cancellationToken)
     {
         var classType = await RequireClassType(classTypeId, cancellationToken);
-        ValidateConcurrencyToken(classType.ConcurrencyToken, request.ConcurrencyToken);
         var existingFeature = classType.Features.SingleOrDefault(f => f.FeatureId == request.Id && f.ClassTypeId == classTypeId);
         if (existingFeature is not null)
         {
             existingFeature.Active = request.IsEnabled;
-            classFeatures.Update(existingFeature);
+            existingFeature.ConfigJson = request.ConfigurationJson;
+            classTypeFeatures.Update(existingFeature);
         }
         else
         {
-            await classFeatures.AddAsync(
+            await classTypeFeatures.AddAsync(
                 new ClassTypeFeature
                 {
                     ClassTypeId = classTypeId,
@@ -97,7 +106,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
                 }, cancellationToken
             );
         }
-        await classFeatures.SaveChangesAsync(cancellationToken);
+        await classTypeFeatures.SaveChangesAsync(cancellationToken);
         return await MapDetailAsync(classType, cancellationToken);
     }
 
@@ -238,9 +247,11 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
     {
         var allFeatures = await features.ListAsync(token);
         return new(classType.Id, classType.Name, classType.Description,
-            [.. classType.Fields.OrderBy(field => field.SortOrder).Select(MapField)],
-            [.. classType.Actions.Select(action => MapAction(action, classType))],
-            [..allFeatures.Select(x => new ClassFeatureDto(x.Id, x.Code, x.Name, classType.Features.FirstOrDefault(f => f.FeatureId == x.Id)?.Active ?? false))
+            [..classType.Fields.OrderBy(field => field.SortOrder).Select(MapField)],
+            [..classType.Actions.Select(action => MapAction(action, classType))],
+            [..allFeatures.Select(x => new ClassTypeFeatureDto(x.Id, x.Code, x.Name, 
+                classType.Features.FirstOrDefault(f => f.FeatureId == x.Id)?.Active ?? false, 
+                classType.Features.FirstOrDefault(f => f.FeatureId == x.Id)?.ConfigJson))
                 .OrderByDescending(x => x.IsEnabled).ThenBy(x => x.Name)],
             classType.ConcurrencyToken);
     }

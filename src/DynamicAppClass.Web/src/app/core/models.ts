@@ -42,12 +42,13 @@ export interface ClassFeature {
   code: string;
   name: string;
   isEnabled: boolean;
+  configurationJson?: string;
 }
 
 export interface UpdateFeatureRequest {
   id: number;
   isEnabled: boolean;
-  concurrencyToken?: string;
+  configurationJson?: string;
 }
 
 export interface ClassAction {
@@ -118,4 +119,16 @@ export interface UpdateClassInstanceValuesRequest {
 export interface ExecuteActionRequest {
   actionId: number;
   concurrencyToken?: string;
+}
+
+export interface AllowedContact {
+  contactTypeValue: string;
+  contactTypeCaption: string;
+  required: boolean;
+  quantityRequired: number;
+  quantityAllowed: number;
+  canBeEntity: boolean;
+  requirePhone: boolean;
+  requireAddress: boolean;
+  requireLicense: boolean;
 }

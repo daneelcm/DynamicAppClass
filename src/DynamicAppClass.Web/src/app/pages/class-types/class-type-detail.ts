@@ -127,7 +127,7 @@ import { RouterLink } from '@angular/router';
             <label class="check" style="justify-content: space-between;">
               <span style="padding: 10px;"><input type="checkbox" (change)="featureEvent(feat.id, $event)" [checked]="feat.isEnabled" /> {{ feat.name }}</span>
               @if (feat.isEnabled){
-                <a class="row-link" [routerLink]="['/class-types', classType.id, 'config-' + feat.code]" style="padding: 9px;">Configure</a>
+                <a class="row-link" [routerLink]="['/class-types', classType.id, 'config-' + feat.code, feat.id]" style="padding: 9px;">Configure</a>
               }
             </label>
           }
@@ -179,8 +179,7 @@ export class ClassTypeDetailPage implements OnInit {
     this.isLoading = true;
     this.api.updateFeature(this.id, {
       id: id,
-      isEnabled: checkbox.checked,
-      concurrencyToken: this.classType?.concurrencyToken
+      isEnabled: checkbox.checked
     }).subscribe(this.refreshObserver());
   }
 
