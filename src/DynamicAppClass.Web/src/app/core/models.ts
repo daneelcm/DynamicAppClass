@@ -85,7 +85,7 @@ export interface ClassInstanceFieldValue {
 }
 
 export interface Contact {
-  id: number;
+  id?: number;
   contactType?: string;
   firstName?: string;
   lastName?: string;
@@ -96,6 +96,7 @@ export interface Contact {
   address1?: string;
   address2?: string;
   city?: string;
+  state?: string;
   zipCode?: string;
   country?: string;
   licenseNumber?: string;

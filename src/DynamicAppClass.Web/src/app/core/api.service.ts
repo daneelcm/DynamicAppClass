@@ -73,6 +73,13 @@ export class ApiService {
   getInstanceContacts(instanceId: number) {
     return this.http.get<Contact[]>(`${API_BASE}/contacts/${instanceId}`);
   }
+  
+  addContact(instanceId: number, contact: Contact) {
+    return this.http.post(`${API_BASE}/contacts`, {
+      instanceId: instanceId,
+      ...contact
+    });
+  }
 
   deleteContact(id: number) {
     return this.http.delete(`${API_BASE}/contacts/${id}`);

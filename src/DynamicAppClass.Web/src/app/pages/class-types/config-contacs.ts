@@ -35,7 +35,6 @@ import { AllowedContact, ClassTypeDetail } from '../../core/models';
         <label class="check"><input type="checkbox" formControlName="requireAddress" /> Require Address</label>
         <label class="check"><input type="checkbox" formControlName="requireLicense" /> Require License</label>
 
-
         <button type="submit" [disabled]="form.invalid">Add Contact Type</button>
         @if (error) { <p class="error">{{ error }}</p> }
       </form>

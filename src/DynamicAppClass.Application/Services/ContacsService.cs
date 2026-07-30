@@ -26,7 +26,8 @@ public sealed class ContactService(IClassInstanceContactRepository classInstance
             EntityName = request.EntityName, 
             Address1 = request.Address1, 
             Address2 = request.Address2, 
-            City = request.City, 
+            City = request.City,
+            State = request.State,
             ZipCode = request.ZipCode, 
             Country = request.Country, 
             LicenseNumber = request.LicenseNumber
@@ -77,9 +78,11 @@ public sealed class ContactService(IClassInstanceContactRepository classInstance
 
     #region Helpers
     private static ClassInstanceContactDto MapToDto(ClassInstanceContact contact)
-        => new(contact.Id, contact.FirstName, contact.LastName, contact.ContactType, contact.IsEntity, contact.Email, contact.Phone, contact.EntityName, contact.Address1, contact.Address2, contact.City, contact.ZipCode, contact.Country, contact.LicenseNumber);
+        => new(contact.Id, contact.FirstName, contact.LastName, contact.ContactType, contact.IsEntity, contact.Email, contact.Phone,
+            contact.EntityName, contact.Address1, contact.Address2, contact.City, contact.State, contact.ZipCode, contact.Country, contact.LicenseNumber);
     
     private static AllowedContactDto MapToAllowedDto(AllowedContact contact)
-        => new(contact.Id, contact.ContactTypeValue, contact.ContactTypeCaption, contact.Required, contact.QuantityRequired, contact.QuantityAllowed, contact.CanBeEntity, contact.RequirePhone, contact.RequireEmail, contact.RequireAddress, contact.RequireLicense);
+        => new(contact.Id, contact.ContactTypeValue, contact.ContactTypeCaption, contact.Required, contact.QuantityRequired,
+            contact.QuantityAllowed, contact.CanBeEntity, contact.RequirePhone, contact.RequireEmail, contact.RequireAddress, contact.RequireLicense);
     #endregion
 }
