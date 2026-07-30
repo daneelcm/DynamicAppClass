@@ -3,10 +3,11 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ClassField, ClassInstanceDetail, ClassTypeDetail } from '../../core/models';
+import { ManageContactPartial } from '../partial-components/manage-contact';
 
 @Component({
   selector: 'app-class-instance-detail',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ManageContactPartial],
   template: `
     @if (instance && classType) {
       <section class="page-heading">
@@ -46,22 +47,27 @@ import { ClassField, ClassInstanceDetail, ClassTypeDetail } from '../../core/mod
           <button type="submit" [disabled]="form.invalid">Save Values</button>
         </form>
 
-        <div class="panel">
-          <h2>Workflow</h2>
-          <p class="muted">Available actions.</p>
-          <div class="action-bar">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          @for (feat of classType.features.filter(f => f.isEnabled); track feat.id) {
+            @if (feat.code === 'contacts') {
+              <app-instance-contact [config]="feat.configurationJson" [instanceId]="instance.id"></app-instance-contact>
+            }
+            @else {
+              <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h2>{{feat.name}}</h2>
+                  <button type="button">Add {{ feat.name }}</button>
+                </div>
+            </div>
+            }
+          }
+          <div class="panel" style="display: flex; justify-content: end;">
             @for (action of instance.availableActions; track action.id) {
               <button type="button" (click)="execute(action.id)">{{ action.name }}</button>
             } @empty {
               <p>No actions are available.</p>
             }
           </div>
-          <h3>Configured Path</h3>
-          <ul class="compact-list">
-            @for (action of classType.actions; track action.id) {
-              <li><strong>{{ action.name }}</strong><span>{{ action.assignFieldName }} -> {{ action.valueToAssign }}</span></li>
-            }
-          </ul>
         </div>
       </section>
     }

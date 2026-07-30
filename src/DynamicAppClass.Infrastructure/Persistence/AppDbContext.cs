@@ -1,3 +1,4 @@
+using DynamicAppClass.Domain.Entities.Contacts;
 using DynamicAppClass.Domain.Entities.Core;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<ClassInstanceFieldValue> ClassInstanceFieldValues => Set<ClassInstanceFieldValue>();
     public DbSet<Feature> Features => Set<Feature>();
     public DbSet<ClassTypeFeature> ClassTypeFeatures => Set<ClassTypeFeature>();
+    public DbSet<ClassInstanceContact> ClassInstanceContacts => Set<ClassInstanceContact>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -97,6 +99,24 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         {
             entity.HasKey(classFeature => classFeature.Id);
             entity.HasOne(classFeature => classFeature.Feature).WithMany().HasForeignKey(classFeature => classFeature.FeatureId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ClassInstanceContact>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.ContactType).HasMaxLength(80).IsRequired();
+            entity.Property(c => c.FirstName).HasMaxLength(80);
+            entity.Property(c => c.LastName).HasMaxLength(80);
+            entity.Property(c => c.EntityName).HasMaxLength(120);
+            entity.Property(c => c.Phone).HasMaxLength(40);
+            entity.Property(c => c.Email).HasMaxLength(120);
+            entity.Property(c => c.Address1).HasMaxLength(120);
+            entity.Property(c => c.Address2).HasMaxLength(120);
+            entity.Property(c => c.City).HasMaxLength(80);
+            entity.Property(c => c.ZipCode).HasMaxLength(20);
+            entity.Property(c => c.Country).HasMaxLength(80);
+            entity.Property(c => c.LicenseNumber).HasMaxLength(40);
+            entity.HasOne(c => c.ClassInstance).WithMany().HasForeignKey(c => c.ClassInstanceId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

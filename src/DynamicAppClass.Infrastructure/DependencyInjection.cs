@@ -1,4 +1,5 @@
 using DynamicAppClass.Application.Interfaces;
+using DynamicAppClass.Application.Services;
 using DynamicAppClass.Infrastructure.Persistence;
 using DynamicAppClass.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,8 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection") ?? "Data Source=dynamic-app-class.db";
         services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+
+        // Register repositories
         services.AddScoped<IClassTypeRepository, ClassTypeRepository>();
         services.AddScoped<IClassFieldRepository, ClassFieldRepository>();
         services.AddScoped<IClassActionRepository, ClassActionRepository>();
@@ -20,6 +23,12 @@ public static class DependencyInjection
         services.AddScoped<IClassInstanceFieldValueRepository, ClassInstanceFieldValueRepository>();
         services.AddScoped<IFeatureRepository, FeatureRepository>();
         services.AddScoped<IClassTypeFeatureRepository, ClassTypeFeatureRepository>();
+        services.AddScoped<IClassInstanceContactRepository, ClassInstanceContactRepository>();
+
+        // Register application services
+        services.AddScoped<ContactService>();
+        services.AddScoped<ClassWorkflowService>();
+
         return services;
     }
 }

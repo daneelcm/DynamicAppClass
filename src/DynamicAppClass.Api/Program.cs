@@ -19,7 +19,6 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API for managing dynamic application classes with configurable fields, statuses, and actions"
     });
 });
-builder.Services.AddScoped<ClassWorkflowService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddCors(options =>
 {

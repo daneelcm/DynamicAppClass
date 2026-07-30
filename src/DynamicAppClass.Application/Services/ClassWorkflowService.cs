@@ -2,7 +2,6 @@ using DynamicAppClass.Application.Dtos;
 using DynamicAppClass.Application.Interfaces;
 using DynamicAppClass.Domain.Entities.Core;
 using DynamicAppClass.Domain.Enums;
-using Newtonsoft.Json;
 
 namespace DynamicAppClass.Application.Services;
 

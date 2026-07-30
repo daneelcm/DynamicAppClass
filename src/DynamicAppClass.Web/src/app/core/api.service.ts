@@ -11,7 +11,8 @@ import {
   ClassTypeSummary,
   CreateClassInstanceRequest,
   ExecuteActionRequest,
-  UpdateClassInstanceValuesRequest
+  UpdateClassInstanceValuesRequest,
+  Contact
 } from './models';
 
 const API_BASE = 'http://localhost:5000/api';
@@ -50,6 +51,14 @@ export class ApiService {
 
   getInstance(id: number) {
     return this.http.get<ClassInstanceDetail>(`${API_BASE}/class-instances/${id}`);
+  }
+
+  getInstanceContacts(instanceId: number) {
+    return this.http.get<Contact[]>(`${API_BASE}/contacts/${instanceId}`);
+  }
+
+  deleteContact(id: number) {
+    return this.http.delete(`${API_BASE}/contacts/${id}`);
   }
 
   createInstance(payload: CreateClassInstanceRequest) {

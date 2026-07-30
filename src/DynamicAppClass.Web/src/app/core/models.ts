@@ -76,12 +76,30 @@ export interface ClassInstanceSummary {
 export interface ClassInstanceDetail extends ClassInstanceSummary {
   fieldValues: ClassInstanceFieldValue[];
   availableActions: ClassAction[];
+  contacts?: Contact[];
 }
 
 export interface ClassInstanceFieldValue {
   fieldId: number;
   fieldName: string;
   value: string | null;
+}
+
+export interface Contact {
+  id: number;
+  contactType?: string;
+  firstName?: string;
+  lastName?: string;
+  isEntity: boolean;
+  entityName?: string;
+  phone?: string;
+  email?: string;
+  address1?: string;
+  address2?: string;
+  city?: string;
+  zipCode?: string;
+  country?: string;
+  licenseNumber?: string;
 }
 
 // Request DTOs

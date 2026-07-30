@@ -1,3 +1,4 @@
+using DynamicAppClass.Domain.Entities.Contacts;
 using DynamicAppClass.Domain.Entities.Core;
 using DynamicAppClass.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -60,12 +61,19 @@ public static class SeedData
             ]
         };
         clx.Fields.AddRange([statusField, titleField, descriptionField, materialField, brickTypeField]);
-
         clx.Actions.AddRange(
         [
             new ClassAction { Name = "Issue", AssignClassField = statusField, ValueToAssign = "2", ConditionClassField = statusField, ConditionValue = "1" },
             new ClassAction { Name = "Reject", AssignClassField = statusField, ValueToAssign = "3", ConditionClassField = statusField, ConditionValue = "1" },
             new ClassAction { Name = "Reopen", AssignClassField = statusField, ValueToAssign = "1", ConditionClassField = statusField, ConditionValue = "3" }
+        ]);
+        clx.Features.AddRange(
+        [
+            new ClassTypeFeature { Feature = new Feature { Name = "Address", Code = "address" }, Active = false },
+            new ClassTypeFeature { Feature = new Feature { Name = "Contacts", Code = "contacts" }, Active = true,
+                    ConfigJson = "[{\"contactTypeValue\":\"1\",\"contactTypeCaption\":\"Aplicant\",\"quantityAllowed\":1,\"required\":true,\"quantityRequired\":1,\"canBeEntity\":true,\"requirePhone\":true,\"requireAddress\":true,\"requireLicense\":false},{\"contactTypeValue\":\"3\",\"contactTypeCaption\":\"Contractor\",\"quantityAllowed\":1,\"required\":false,\"quantityRequired\":1,\"canBeEntity\":true,\"requirePhone\":true,\"requireAddress\":true,\"requireLicense\":true},{\"contactTypeValue\":\"2\",\"contactTypeCaption\":\"Property Owner\",\"quantityAllowed\":3,\"required\":true,\"quantityRequired\":1,\"canBeEntity\":true,\"requirePhone\":false,\"requireAddress\":true,\"requireLicense\":false}]"
+            },
+            new ClassTypeFeature { Feature = new Feature { Name = "Documents", Code = "documents" }, Active = false }
         ]);
 
         var instance = new ClassInstance
@@ -80,11 +88,10 @@ public static class SeedData
             ]
         };
 
-        dbContext.Features.AddRange(
-            new Feature { Name = "Address", Code = "address" },
-            new Feature { Name = "Contacts", Code = "contacts" },
-            new Feature { Name = "Documents", Code = "documents" }
-        );
+        dbContext.ClassInstanceContacts.AddRange([
+            new ClassInstanceContact { ClassInstance = instance, ContactType = "1", FirstName = "John", LastName = "Doe", Phone = "123-456-7890", Address1 = "123 Main St" },
+            new ClassInstanceContact { ClassInstance = instance, ContactType = "2", FirstName = "Jane", LastName = "Smith", Address1 = "456 Elm St" }
+        ]);
         dbContext.ClassTypes.Add(clx);
         dbContext.ClassInstances.Add(instance);
         await dbContext.SaveChangesAsync(cancellationToken);
