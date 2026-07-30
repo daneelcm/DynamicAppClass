@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<IFeatureRepository, FeatureRepository>();
         services.AddScoped<IClassTypeFeatureRepository, ClassTypeFeatureRepository>();
         services.AddScoped<IClassInstanceContactRepository, ClassInstanceContactRepository>();
+        services.AddScoped<IContactConfigRepository, ContactConfigRepository>();
 
         // Register application services
         services.AddScoped<ContactService>();

@@ -34,8 +34,4 @@ public sealed class ClassTypesController(ClassWorkflowService workflowService) :
     [HttpPut("{id:int}/feature")]
     public async Task<ActionResult<ClassTypeDetailDto>> UpdateFeature(int id, ClassTypeFeatureRequest request, CancellationToken cancellationToken) =>
         Ok(await workflowService.UpdateFeatureAsync(id, request, cancellationToken));
-
-    [HttpGet("{typeId:int}/config/{featureId:int}")]
-    public async Task<ActionResult> GetFeatureConfiguration(int typeId, int featureId, CancellationToken cancellationToken) =>
-        Ok(await workflowService.GetFeatureConfigurationAsync(typeId, featureId, cancellationToken));
 }

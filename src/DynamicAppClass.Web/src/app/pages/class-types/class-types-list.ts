@@ -33,7 +33,7 @@ import { ClassTypeSummary } from '../../core/models';
                 <strong>{{ type.name }}</strong>
                 <small>{{ type.description }}</small>
               </span>
-              <span class="metrics">{{ type.fieldCount }} fields · {{ type.actionCount }} actions</span>
+              <span class="metrics">{{ type.fieldCount }} fields · {{ type.actionCount }} actions · {{ type.featuresCount }} features</span>
             </a>
           } @empty {
             <p>{{ error || 'No class types yet.' }}</p>

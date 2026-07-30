@@ -50,7 +50,7 @@ import { ManageContactPartial } from '../partial-components/manage-contact';
         <div style="display: flex; flex-direction: column; gap: 10px;">
           @for (feat of classType.features.filter(f => f.isEnabled); track feat.id) {
             @if (feat.code === 'contacts') {
-              <app-instance-contact [config]="feat.configurationJson" [instanceId]="instance.id"></app-instance-contact>
+              <app-instance-contact [classTypeId]="instance.classTypeId" [instanceId]="instance.id"></app-instance-contact>
             }
             @else {
               <div class="panel">

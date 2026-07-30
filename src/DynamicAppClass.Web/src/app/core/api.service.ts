@@ -12,7 +12,8 @@ import {
   CreateClassInstanceRequest,
   ExecuteActionRequest,
   UpdateClassInstanceValuesRequest,
-  Contact
+  Contact,
+  AllowedContact
 } from './models';
 
 const API_BASE = 'http://localhost:5000/api';
@@ -53,14 +54,6 @@ export class ApiService {
     return this.http.get<ClassInstanceDetail>(`${API_BASE}/class-instances/${id}`);
   }
 
-  getInstanceContacts(instanceId: number) {
-    return this.http.get<Contact[]>(`${API_BASE}/contacts/${instanceId}`);
-  }
-
-  deleteContact(id: number) {
-    return this.http.delete(`${API_BASE}/contacts/${id}`);
-  }
-
   createInstance(payload: CreateClassInstanceRequest) {
     return this.http.post<ClassInstanceDetail>(`${API_BASE}/class-instances`, payload);
   }
@@ -75,5 +68,28 @@ export class ApiService {
 
   executeAction(id: number, payload: ExecuteActionRequest) {
     return this.http.post<ClassInstanceDetail>(`${API_BASE}/class-instances/${id}/actions`, payload);
+  }
+
+  getInstanceContacts(instanceId: number) {
+    return this.http.get<Contact[]>(`${API_BASE}/contacts/${instanceId}`);
+  }
+
+  deleteContact(id: number) {
+    return this.http.delete(`${API_BASE}/contacts/${id}`);
+  }
+
+  getContactsConfig(typeId: number) {
+    return this.http.get<AllowedContact[]>(`${API_BASE}/contacts/config/${typeId}`);
+  }
+
+  deleteAllowedContact(id: number) {
+    return this.http.delete(`${API_BASE}/contacts/config/${id}`);
+  }
+
+  addAllowedContact(typeId: number, contact: AllowedContact) {
+    return this.http.post(`${API_BASE}/contacts/config`, {
+      classTypeId: typeId,
+      ...contact
+    });
   }
 }

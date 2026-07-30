@@ -70,9 +70,7 @@ public static class SeedData
         clx.Features.AddRange(
         [
             new ClassTypeFeature { Feature = new Feature { Name = "Address", Code = "address" }, Active = false },
-            new ClassTypeFeature { Feature = new Feature { Name = "Contacts", Code = "contacts" }, Active = true,
-                    ConfigJson = "[{\"contactTypeValue\":\"1\",\"contactTypeCaption\":\"Aplicant\",\"quantityAllowed\":1,\"required\":true,\"quantityRequired\":1,\"canBeEntity\":true,\"requirePhone\":true,\"requireAddress\":true,\"requireLicense\":false},{\"contactTypeValue\":\"3\",\"contactTypeCaption\":\"Contractor\",\"quantityAllowed\":1,\"required\":false,\"quantityRequired\":1,\"canBeEntity\":true,\"requirePhone\":true,\"requireAddress\":true,\"requireLicense\":true},{\"contactTypeValue\":\"2\",\"contactTypeCaption\":\"Property Owner\",\"quantityAllowed\":3,\"required\":true,\"quantityRequired\":1,\"canBeEntity\":true,\"requirePhone\":false,\"requireAddress\":true,\"requireLicense\":false}]"
-            },
+            new ClassTypeFeature { Feature = new Feature { Name = "Contacts", Code = "contacts" }, Active = true },
             new ClassTypeFeature { Feature = new Feature { Name = "Documents", Code = "documents" }, Active = false }
         ]);
 
@@ -91,6 +89,11 @@ public static class SeedData
         dbContext.ClassInstanceContacts.AddRange([
             new ClassInstanceContact { ClassInstance = instance, ContactType = "1", FirstName = "John", LastName = "Doe", Phone = "123-456-7890", Address1 = "123 Main St" },
             new ClassInstanceContact { ClassInstance = instance, ContactType = "2", FirstName = "Jane", LastName = "Smith", Address1 = "456 Elm St" }
+        ]);
+        dbContext.AllowedContacts.AddRange([
+            new AllowedContact { ClassType = clx, ContactTypeValue = "1", ContactTypeCaption = "Aplicant", QuantityAllowed = 1, Required = true, QuantityRequired = 1, CanBeEntity = true, RequirePhone = true, RequireEmail = true, RequireAddress = true, RequireLicense = false },
+            new AllowedContact { ClassType = clx, ContactTypeValue = "2", ContactTypeCaption = "Property Owner", QuantityAllowed = 3, Required = true, QuantityRequired = 1, CanBeEntity = true, RequirePhone = false, RequireEmail = false, RequireAddress = true, RequireLicense = false },
+            new AllowedContact { ClassType = clx, ContactTypeValue = "3", ContactTypeCaption = "Contractor", QuantityAllowed = 1, Required = false, QuantityRequired = 1, CanBeEntity = true, RequirePhone = true, RequireEmail = false, RequireAddress = true, RequireLicense = true }
         ]);
         dbContext.ClassTypes.Add(clx);
         dbContext.ClassInstances.Add(instance);

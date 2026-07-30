@@ -11,6 +11,7 @@ export interface ClassTypeSummary {
   description: string;
   fieldCount: number;
   actionCount: number;
+  featuresCount: number;
   concurrencyToken?: string;
 }
 
@@ -42,13 +43,11 @@ export interface ClassFeature {
   code: string;
   name: string;
   isEnabled: boolean;
-  configurationJson?: string;
 }
 
 export interface UpdateFeatureRequest {
   id: number;
   isEnabled: boolean;
-  configurationJson?: string;
 }
 
 export interface ClassAction {
@@ -140,6 +139,7 @@ export interface ExecuteActionRequest {
 }
 
 export interface AllowedContact {
+  id?: number;
   contactTypeValue: string;
   contactTypeCaption: string;
   required: boolean;
@@ -147,6 +147,7 @@ export interface AllowedContact {
   quantityAllowed: number;
   canBeEntity: boolean;
   requirePhone: boolean;
+  requireEmail: boolean;
   requireAddress: boolean;
   requireLicense: boolean;
 }

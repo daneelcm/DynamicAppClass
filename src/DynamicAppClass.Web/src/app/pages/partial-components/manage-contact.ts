@@ -42,10 +42,8 @@ export class ManageContactPartial implements OnInit {
   contacts?: Contact[];
   error = ''
   
-  @Input() set config(value: string | undefined) {
-    this.allowedContacts = JSON.parse(value ?? '[]') as AllowedContact[];
-  }
-  
+  @Input()
+  classTypeId!: number;
   @Input()
   instanceId!: number;
 
@@ -73,6 +71,16 @@ export class ManageContactPartial implements OnInit {
       },
       error: err => {
         this.error = err.error?.title ?? 'Unable to load instance.';
+        this.cdr.detectChanges();
+      }
+    });
+    this.api.getContactsConfig(this.classTypeId).subscribe({
+      next: contacts => {
+        this.allowedContacts = contacts;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        this.error = err.error?.title ?? 'Unable to load allowed contacts.';
         this.cdr.detectChanges();
       }
     });
