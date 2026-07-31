@@ -126,6 +126,7 @@ export interface CreateClassInstanceRequest {
   classTypeId: number;
   title?: string;
   fieldValues: Record<string, string | null>;
+  featuresData: Record<string, []>;
   concurrencyToken?: string;
 }
 

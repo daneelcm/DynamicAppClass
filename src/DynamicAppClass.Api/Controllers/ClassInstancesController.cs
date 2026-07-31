@@ -1,12 +1,15 @@
 using DynamicAppClass.Application.Dtos;
 using DynamicAppClass.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace DynamicAppClass.Api.Controllers;
 
 [ApiController]
 [Route("api/class-instances")]
-public sealed class ClassInstancesController(ClassWorkflowService workflowService) : ControllerBase
+public sealed class ClassInstancesController(ClassWorkflowService workflowService, ContactService contactService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ClassInstanceSummaryDto>>> List(CancellationToken cancellationToken) =>
@@ -20,7 +23,19 @@ public sealed class ClassInstancesController(ClassWorkflowService workflowServic
     public async Task<ActionResult<ClassInstanceDetailDto>> Create(CreateClassInstanceRequest request, CancellationToken cancellationToken)
     {
         var created = await workflowService.CreateInstanceAsync(request, cancellationToken);
-        return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+
+        if (created != null && request.FeaturesData.ContainsKey("contacts")) {
+            foreach (var data in request.FeaturesData["contacts"])
+            {
+                var item = JsonConvert.DeserializeObject<ClassInstanceContactDto>(data.ToString());
+
+                await contactService.CreateInstanceContact(new AddContactRequest(created.Id, item.FirstName, item.LastName, item.ContactType,
+                    item.IsEntity, item.Email, item.Phone, item.EntityName, item.Address1, item.Address2, item.City, item.State, item.ZipCode,
+                    item.Country, item.LicenseNumber), cancellationToken);
+            }
+            return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+        }
+        return BadRequest();
     }
 
     [HttpPut("{id:int}/field-values")]

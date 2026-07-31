@@ -122,7 +122,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         var instance = new ClassInstance
         {
             ClassTypeId = classType.Id,
-            FieldValues = request.FieldValues.Select(pair => new ClassInstanceFieldValue { ClassFieldId = pair.Key, Value = pair.Value }).ToList()
+            FieldValues = [.. request.FieldValues.Select(pair => new ClassInstanceFieldValue { ClassFieldId = pair.Key, Value = pair.Value })]
         };
 
         await classInstances.AddAsync(instance, cancellationToken);

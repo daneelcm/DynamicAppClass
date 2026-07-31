@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, Input, model, OnInit } from '@angular/core';
 import { AllowedContact, Contact } from '../../core/models';
 import { ApiService } from '../../core/api.service';
 import { ɵInternalFormsSharedModule, ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
@@ -19,15 +19,15 @@ import { ɵInternalFormsSharedModule, ReactiveFormsModule, FormBuilder, Validato
         <form [formGroup]="form" (ngSubmit)="addContact()" style="display: grid; gap: 10px;">
           <label><div>Contact Type<span class="required">*</span></div>
             <select formControlName="contactType" (change)="setValidators()">
-            @for (contactType of allowedContacts; track $index) {
+            @for (contactType of _allowedContacts; track $index) {
               <option [value]="contactType.contactTypeValue" 
-                [disabled]="contacts?.filter(x => x.contactType == contactType.contactTypeValue)?.length == contactType.quantityAllowed"
+                [disabled]="_contacts?.filter(x => x.contactType == contactType.contactTypeValue)?.length == contactType.quantityAllowed"
               >{{contactType.contactTypeCaption}}
               </option>
             }
           </select></label>
           @if(form.get('contactType')?.value){
-            @let ctSelected = allowedContacts?.find(x => x.contactTypeValue == form.get('contactType')?.value);
+            @let ctSelected = _allowedContacts?.find(x => x.contactTypeValue == form.get('contactType')?.value);
             @if (ctSelected?.canBeEntity){
               <label class="check"><input type="checkbox" formControlName="isEntity" (change)="setValidators();" /> {{ ctSelected.contactTypeCaption }} is an Entity</label>
               @if (form.get('isEntity')?.value) {
@@ -57,20 +57,20 @@ import { ɵInternalFormsSharedModule, ReactiveFormsModule, FormBuilder, Validato
       }
       @else {
         <ul class="compact-list">
-          @for (contact of contacts; track contact.id) {
-          <li style="display: flex; justify-content: space-between;">
-            <span style="display: grid;">
-            @if (contact.isEntity) { <strong>{{ contact.entityName }}</strong> } @else { <strong>{{ contact.firstName }} {{ contact.lastName }}</strong> }
-            @if (contact.contactType) { {{ allowedContacts?.find(c => c.contactTypeValue === contact.contactType)?.contactTypeCaption }} }
-            @if (contact.phone) { | {{ contact.phone }} }
-            @if (contact.email) { | {{ contact.email }} }
-            @if (contact.address1 || contact.address2 || contact.city || contact.zipCode || contact.country) {
-            | {{ [contact.address1, contact.address2, contact.city, contact.zipCode, contact.country].filter(x => x).join(', ') }}
-            }
-            @if (contact.licenseNumber) { | License: {{ contact.licenseNumber }} }
-            </span>
-            <a class="row-link" style="padding: 10px; cursor: pointer;" (click)="remove(contact.id!)">❌</a>
-          </li>
+          @for (contact of _contacts; track contact.id) {
+            <li style="display: flex; justify-content: space-between;">
+              <span style="display: grid;">
+              @if (contact.isEntity) { <strong>{{ contact.entityName }}</strong> } @else { <strong>{{ contact.firstName }} {{ contact.lastName }}</strong> }
+              @if (contact.contactType) { {{ _allowedContacts?.find(c => c.contactTypeValue === contact.contactType)?.contactTypeCaption }} }
+              @if (contact.phone) { | {{ contact.phone }} }
+              @if (contact.email) { | {{ contact.email }} }
+              @if (contact.address1 || contact.address2 || contact.city || contact.zipCode || contact.country) {
+              | {{ [contact.address1, contact.address2, contact.city, contact.zipCode, contact.country].filter(x => x).join(', ') }}
+              }
+              @if (contact.licenseNumber) { | License: {{ contact.licenseNumber }} }
+              </span>
+              <a class="row-link" style="padding: 10px; cursor: pointer; margin: auto 0;" (click)="remove(contact.id ?? $index)">❌</a>
+            </li>
           }
         </ul>
       }
@@ -85,27 +85,29 @@ export class ManageContactPartial implements OnInit {
   @Input()
   classTypeId!: number;
   @Input()
-  instanceId!: number;
+  instanceId?: number;
 
-  allowedContacts?: AllowedContact[];
-  contacts?: Contact[];
+  contacts = model<Contact[]>([]);
+
+  protected _allowedContacts?: AllowedContact[];
+  protected _contacts: Contact[] = [];
   addInProgress = false;
   error = ''
   form = this.fb.nonNullable.group({
     contactType: ['', Validators.required],
     isEntity: [false],
-    firstName: [undefined],
-    lastName: [undefined],
-    entityName: [undefined],
-    phone: [undefined],
-    email: [undefined],
-    address1: [undefined],
-    address2: [undefined],
-    city: [undefined],
-    state: [undefined],
-    zipCode: [undefined],
-    country: [undefined],
-    licenseNumber: [undefined]
+    firstName: [''],
+    lastName: [''],
+    entityName: [''],
+    phone: [''],
+    email: [''],
+    address1: [''],
+    address2: [''],
+    city: [''],
+    state: [''],
+    zipCode: [''],
+    country: [''],
+    licenseNumber: ['']
   });
 
   ngOnInit(): void {
@@ -113,19 +115,19 @@ export class ManageContactPartial implements OnInit {
   }
 
   setValidators() {
-    var type = this.allowedContacts?.find(x => x.contactTypeValue == this.form.get('contactType')?.value);
+    var type = this._allowedContacts?.find(x => x.contactTypeValue == this.form.get('contactType')?.value);
 
     if (type?.canBeEntity) {
       if (this.form.get('isEntity')?.value) {
         this.form.get('entityName')?.setValidators([Validators.required]);
-        this.form.get('firstName')?.setValue(undefined);
+        this.form.get('firstName')?.setValue('');
         this.form.get('firstName')?.clearValidators();
-        this.form.get('lastName')?.setValue(undefined);
+        this.form.get('lastName')?.setValue('');
         this.form.get('lastName')?.clearValidators();
       }
     }
     if (!(type?.canBeEntity) || !(this.form.get('isEntity')?.value)) {
-      this.form.get('entityName')?.setValue(undefined);
+      this.form.get('entityName')?.setValue('');
       this.form.get('entityName')?.clearValidators();
       this.form.get('firstName')?.setValidators([Validators.required]);
       this.form.get('lastName')?.setValidators([Validators.required]);
@@ -182,45 +184,61 @@ export class ManageContactPartial implements OnInit {
 
   addContact(){
     var values = this.form.getRawValue();
-    this.api.addContact(this.instanceId, values).subscribe({
-      next: () =>{
-        this.switchForm();
-        this.load();
-      },
-      error: err => {
-        this.error = err.error?.title ?? 'Unable to delete the Contact.';
-        this.cdr.detectChanges();
-      }
-    });
+    if (this.instanceId){
+      this.api.addContact(this.instanceId, values).subscribe({
+        next: () =>{
+          this.switchForm();
+          this.load();
+        },
+        error: err => {
+          this.error = err.error?.title ?? 'Unable to delete the Contact.';
+          this.cdr.detectChanges();
+        }
+      });
+    }
+    else{
+      this._contacts?.push(values);
+      this.contacts.set(this._contacts);
+      this.switchForm();
+      this.cdr.detectChanges();
+    }
   }
 
   remove(id: number){
-    this.api.deleteContact(id).subscribe({
-      next: () => {
-        this.load();
-        this.cdr.detectChanges();
-      },
-      error: err => {
-        this.error = err.error?.title ?? 'Unable to delete the Contact.';
-        this.cdr.detectChanges();
-      }
-    });
+    if (this.instanceId) {
+      this.api.deleteContact(id).subscribe({
+        next: () => {
+          this.load();
+          this.cdr.detectChanges();
+        },
+        error: err => {
+          this.error = err.error?.title ?? 'Unable to delete the Contact.';
+          this.cdr.detectChanges();
+        }
+      });
+    }
+    else{
+      this._contacts?.splice(id, 1);
+      this.contacts.set(this._contacts);
+    }
   }
 
   private load() {
-    this.api.getInstanceContacts(this.instanceId).subscribe({
-      next: contacts => {
-        this.contacts = contacts;
-        this.cdr.detectChanges();
-      },
-      error: err => {
-        this.error = err.error?.title ?? 'Unable to load instance.';
-        this.cdr.detectChanges();
-      }
-    });
+    if(this.instanceId){
+      this.api.getInstanceContacts(this.instanceId).subscribe({
+        next: contacts => {
+          this._contacts = contacts;
+          this.cdr.detectChanges();
+        },
+        error: err => {
+          this.error = err.error?.title ?? 'Unable to load instance.';
+          this.cdr.detectChanges();
+        }
+      });
+    }
     this.api.getContactsConfig(this.classTypeId).subscribe({
       next: contacts => {
-        this.allowedContacts = contacts;
+        this._allowedContacts = contacts;
         this.cdr.detectChanges();
       },
       error: err => {
