@@ -4,11 +4,15 @@ import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ClassField, ClassInstanceSummary, ClassTypeDetail, ClassTypeSummary } from '../../core/models';
 import { ManageContactPartial } from "../partial-components/manage-contact";
-import { JsonPipe } from '@angular/common';
+
+interface FeatureManagement {
+  data: [],
+  isValid: boolean
+}
 
 @Component({
   selector: 'app-class-instances-list',
-  imports: [ReactiveFormsModule, RouterLink, ManageContactPartial, JsonPipe],
+  imports: [ReactiveFormsModule, RouterLink, ManageContactPartial],
   template: `
     <section class="page-heading">
       <div>
@@ -69,7 +73,8 @@ import { JsonPipe } from '@angular/common';
             }
             @else {
               @if (currentStep === 'contacts') {
-                <app-instance-contact [classTypeId]="selectedType.id" [(contacts)]="featuresData['contacts']" style="display: grid;"></app-instance-contact>
+                <app-instance-contact [classTypeId]="selectedType.id" [(isValid)]="featuresInfo[currentStep].isValid"
+                  [(contacts)]="featuresInfo[currentStep].data" style="display: grid;"></app-instance-contact>
               }
               @else {
                 <div class="panel">
@@ -84,10 +89,11 @@ import { JsonPipe } from '@angular/common';
             <div class="panel" style="display: flex; justify-content: end; gap:10px; align-items: flex-end;">
               <button type="button" [disabled]="currentStep == 'appData'" (click)="currentStep = featureCodes[0] == currentStep ? 'appData' : featureCodes[featureCodes.indexOf(currentStep) - 1]"><- Back</button>
               @if (featureCodes[featureCodes.length - 1] == currentStep) {
-                <button type="submit" [disabled]="form.invalid || !selectedType">Submit</button>
+                <button type="submit" [disabled]="(currentStep == 'appData' && form.invalid) || (currentStep != 'appData' && !(featuresInfo[currentStep].isValid))">Submit</button>
               }
               @else {
-                <button type="button" [disabled]="form.invalid" (click)="currentStep = featureCodes[featureCodes.indexOf(currentStep) + 1]">Next -></button>
+                <button type="button" [disabled]="(currentStep == 'appData' && form.invalid) || (currentStep != 'appData' && !(featuresInfo[currentStep].isValid))"
+                  (click)="currentStep = featureCodes[featureCodes.indexOf(currentStep) + 1]">Next -></button>
               }
             </div>
           </div>
@@ -123,7 +129,7 @@ export class ClassInstancesList implements OnInit {
   instances: ClassInstanceSummary[] = [];
   selectedType?: ClassTypeDetail;
   featureCodes: string[] = [];
-  featuresData: Record<string, []> = {};
+  featuresInfo: Record<string, FeatureManagement> = {};
   currentStep = 'appData';
   error = '';
 
@@ -182,7 +188,7 @@ export class ClassInstancesList implements OnInit {
         
         for (const feat of type.features.filter(x => x.isEnabled)){
           this.featureCodes.push(feat.code);
-          this.featuresData[feat.code] = [];
+          this.featuresInfo[feat.code] = { data: [], isValid: false };
         }
         this.cdr.detectChanges();
       },
@@ -198,11 +204,17 @@ export class ClassInstancesList implements OnInit {
       return;
     }
 
+    let featureData: Record<string, []> = {};
+
+    this.featureCodes.forEach(x => {
+      featureData[x] = this.featuresInfo[x].data
+    });
+
     const raw = this.form.getRawValue();
     this.api.createInstance({
       classTypeId: raw.classTypeId ?? 0,
       fieldValues: raw.fieldValues as Record<string, string | null>,
-      featuresData: this.featuresData,
+      featuresData: featureData,
       concurrencyToken: this.selectedType.concurrencyToken
     }).subscribe({
       next: instance => this.router.navigate(['/instances', instance.id]),

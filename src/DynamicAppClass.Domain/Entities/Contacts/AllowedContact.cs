@@ -10,7 +10,7 @@ namespace DynamicAppClass.Domain.Entities.Contacts
         public required string ContactTypeCaption { get; set; }
         public bool Required { get; set; } = false;
         public int QuantityRequired { get; set; } = 1;
-        public int QuantityAllowed { get; set; } = 1;
+        public int QuantityAllowed { get; set; } = 0;
         public bool CanBeEntity { get; set; } = false;
         public bool RequirePhone { get; set; } = false;
         public bool RequireEmail { get; set; } = false;

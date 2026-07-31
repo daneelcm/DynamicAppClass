@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
-import { AllowedContact, ClassTypeDetail } from '../../core/models';
+import { AllowedContact } from '../../core/models';
 
 @Component({
   selector: 'app-class-types-list',
@@ -11,7 +11,6 @@ import { AllowedContact, ClassTypeDetail } from '../../core/models';
     <section class="page-heading">
       <span>
         <h1>Contacts Configuration</h1>
-        <p>Configure Feature "Contacts" for Class "{{ classType?.name }}".</p>
       </span>
       <span>
         <a class="row-link" [routerLink]="['/class-types', typeId]"><- Back</a>
@@ -21,12 +20,14 @@ import { AllowedContact, ClassTypeDetail } from '../../core/models';
     <section class="two-column">
       <form class="panel" [formGroup]="form" (ngSubmit)="addAllowedContact()">
         <h2>New Allowed Contact Type</h2>
-        <label>Contact Type Value <input formControlName="contactTypeValue" /></label>
-        <label>Contact Type Caption <input formControlName="contactTypeCaption" /></label>
-        <label>Quantity Allowed <input formControlName="quantityAllowed" type="number" min="1" max="10" /></label>
-        <label class="check"><input type="checkbox" formControlName="required" /> Required
-          @if(form.get('required')?.value) { 
-            <input formControlName="quantityRequired" type="number" min="1" [max]="form.get('quantityAllowed')?.value ?? 10" />
+        <label><div>Contact Type Value<span class="required">*</span></div><input formControlName="contactTypeValue" /></label>
+        <label><div>Contact Type Caption<span class="required">*</span></div><input formControlName="contactTypeCaption" /></label>
+        <label><div>Quantity Allowed<span class="required">*</span></div><input formControlName="quantityAllowed" type="number" min="1" max="10"
+          (change)="allowedChanged()" /></label>
+        <label class="check"><input type="checkbox" formControlName="required" (change)="requiredChanged()" /> Required
+          @if(form.get('required')?.value) {
+            <input formControlName="quantityRequired" type="number" [min]="1" [max]="form.get('required')?.value ? form.get('quantityAllowed')?.value ?? 10 : 0"
+            /><span class="required">*</span>
           }
         </label>
         <label class="check"><input type="checkbox" formControlName="canBeEntity" /> Can Be Entity</label>
@@ -69,7 +70,6 @@ export class ConfigContactsPage implements OnInit {
   private readonly api = inject(ApiService);
   private readonly fb = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
-  classType?: ClassTypeDetail;
   allowedContacts: AllowedContact[] = [];
   error = '';
   typeId = 0;
@@ -79,7 +79,7 @@ export class ConfigContactsPage implements OnInit {
     contactTypeCaption: ['', Validators.required],
     quantityAllowed: [1, [Validators.min(1), Validators.max(10)]],
     required: [false],
-    quantityRequired: [1, [Validators.min(1), Validators.max(10)]],
+    quantityRequired: [0],
     canBeEntity: [false],
     requirePhone: [false],
     requireEmail: [false],
@@ -89,8 +89,19 @@ export class ConfigContactsPage implements OnInit {
 
   ngOnInit() {
     this.typeId = Number.parseInt(this.route.snapshot.paramMap.get('typeId') ?? '0');
-
     this.load();
+  }
+
+  allowedChanged(){
+    if ((this.form.get('quantityRequired')?.value ?? 0) > (this.form.get('quantityAllowed')?.value ?? 1))
+      this.form.get('quantityRequired')?.setValue(this.form.get('quantityAllowed')?.value ?? 1);
+  }
+
+  requiredChanged(){
+    this.form.get('quantityRequired')?.setValue((this.form.get('required')?.value ?? false) ? 1 : 0);
+    this.form.get('quantityRequired')?.clearValidators();
+    this.form.get('quantityRequired')?.updateValueAndValidity();
+    this.form.updateValueAndValidity();
   }
 
   addAllowedContact(){

@@ -23,6 +23,7 @@ import { ɵInternalFormsSharedModule, ReactiveFormsModule, FormBuilder, Validato
               <option [value]="contactType.contactTypeValue" 
                 [disabled]="_contacts?.filter(x => x.contactType == contactType.contactTypeValue)?.length == contactType.quantityAllowed"
               >{{contactType.contactTypeCaption}}
+              @if (_contacts.filter(x => x.contactType == contactType.contactTypeValue).length < contactType.quantityRequired) {<span class="required">*</span>}
               </option>
             }
           </select></label>
@@ -57,7 +58,7 @@ import { ɵInternalFormsSharedModule, ReactiveFormsModule, FormBuilder, Validato
       }
       @else {
         <ul class="compact-list">
-          @for (contact of _contacts; track contact.id) {
+          @for (contact of _contacts; track $index) {
             <li style="display: flex; justify-content: space-between;">
               <span style="display: grid;">
               @if (contact.isEntity) { <strong>{{ contact.entityName }}</strong> } @else { <strong>{{ contact.firstName }} {{ contact.lastName }}</strong> }
@@ -87,7 +88,8 @@ export class ManageContactPartial implements OnInit {
   @Input()
   instanceId?: number;
 
-  contacts = model<Contact[]>([]);
+  contacts = model<Contact[]>();
+  isValid = model<boolean>(false);
 
   protected _allowedContacts?: AllowedContact[];
   protected _contacts: Contact[] = [];
@@ -176,10 +178,18 @@ export class ManageContactPartial implements OnInit {
     this.form.get('country')?.updateValueAndValidity();
   }
 
+  checkFeatureValidation(){
+    this.isValid.set(!this.addInProgress &&
+      (this._allowedContacts?.every(x => x.quantityRequired <= (this._contacts.filter(y => y.contactType == x.contactTypeValue)?.length ?? 0)) ?? false)
+    );
+  }
+
   switchForm(){
     this.addInProgress = !this.addInProgress;
-    if (!this.addInProgress)
+    this.checkFeatureValidation();
+    if (!this.addInProgress){
       this.form.reset();
+    }
   }
 
   addContact(){
@@ -209,6 +219,7 @@ export class ManageContactPartial implements OnInit {
       this.api.deleteContact(id).subscribe({
         next: () => {
           this.load();
+          this.checkFeatureValidation();
           this.cdr.detectChanges();
         },
         error: err => {
@@ -218,8 +229,9 @@ export class ManageContactPartial implements OnInit {
       });
     }
     else{
-      this._contacts?.splice(id, 1);
+      this._contacts.splice(id, 1);
       this.contacts.set(this._contacts);
+      this.checkFeatureValidation();
     }
   }
 
@@ -235,6 +247,9 @@ export class ManageContactPartial implements OnInit {
           this.cdr.detectChanges();
         }
       });
+    }
+    else{
+      this._contacts = this.contacts() ?? [];
     }
     this.api.getContactsConfig(this.classTypeId).subscribe({
       next: contacts => {

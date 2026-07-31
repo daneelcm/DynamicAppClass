@@ -46,7 +46,7 @@ public sealed class ContactService(IClassInstanceContactRepository classInstance
             ContactTypeCaption = request.ContactTypeCaption,
             CanBeEntity = request.CanBeEntity,
             QuantityAllowed = request.QuantityAllowed,
-            QuantityRequired = request.QuantityRequired,
+            QuantityRequired = request.Required ? request.QuantityRequired : 0,
             Required = request.Required,
             RequireAddress = request.RequireAddress,
             RequireEmail = request.RequireEmail,
