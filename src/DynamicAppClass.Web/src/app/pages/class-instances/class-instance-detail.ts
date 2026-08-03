@@ -22,7 +22,7 @@ import { ManageContactPartial } from '../partial-components/manage-contact';
 
       <section class="two-column">
         <form class="panel" [formGroup]="form" (ngSubmit)="save()">
-          <h2>Field Values</h2>
+          <h2>Application Summary</h2>
           @for (field of classType.fields; track field.id) {
             @if (field.isHidden) {
               <input type="hidden" [formControlName]="field.id" />
@@ -48,7 +48,7 @@ import { ManageContactPartial } from '../partial-components/manage-contact';
         </form>
 
         <div style="display: flex; flex-direction: column; gap: 10px;">
-          @for (feat of classType.features.filter(f => f.isEnabled); track feat.id) {
+          @for (feat of classType.features.filter(f => f.isEnabled && !f.isFieldFeature); track feat.id) {
             @if (feat.code === 'contacts') {
               <app-instance-contact [classTypeId]="instance.classTypeId" [instanceId]="instance.id"></app-instance-contact>
             }

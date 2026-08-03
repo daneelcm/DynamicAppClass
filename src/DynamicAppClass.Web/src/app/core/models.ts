@@ -35,6 +35,7 @@ export interface ClassField {
   sortOrder: number;
   dependsOnClassFieldId: number | null;
   dependsOnClassFieldValue: string | null;
+  featureCode: string;
   options: FieldOptions[];
 }
 
@@ -43,6 +44,7 @@ export interface ClassFeature {
   code: string;
   name: string;
   isEnabled: boolean;
+  isFieldFeature: boolean
 }
 
 export interface UpdateFeatureRequest {

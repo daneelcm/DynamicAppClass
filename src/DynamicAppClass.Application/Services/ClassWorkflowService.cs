@@ -35,7 +35,11 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
         ValidateText(request.Name, "Field name");
         var classType = await RequireClassType(classTypeId, cancellationToken);
         ValidateConcurrencyToken(classType.ConcurrencyToken, request.ConcurrencyToken);
-        var lookups = request.Options?.Select((option, index) => new Lookup { Caption = option.Trim(), Value = index.ToString() }).ToList() ?? [];
+
+        var feature = (await features.ListAsync(cancellationToken)).SingleOrDefault(f => f.Code == request.FeatureCode && f.IsFieldFeature)
+            ?? throw new InvalidOperationException($"Feature with code '{request.FeatureCode}' not found.");
+
+        var lookups = request.Options?.Select((option, index) => new Lookup { Caption = option.Trim(), Value = (index + 1).ToString() }).ToList() ?? [];
         await classFields.AddAsync(new ClassField
         {
             ClassTypeId = classTypeId,
@@ -51,6 +55,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
                 FieldType = request.FieldType,
                 Options = lookups
             },
+            FeatureId = feature.Id,
             Options = lookups?.Select(lookup => new ClassFieldLookup { Lookup = lookup }).ToList() ?? []
         }, cancellationToken);
         await classFields.SaveChangesAsync(cancellationToken);
@@ -231,7 +236,7 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
     }
 
     private static ClassTypeSummaryDto MapSummary(ClassType classType) =>
-        new(classType.Id, classType.Name, classType.Description, classType.Fields.Count, classType.Actions.Count, classType.Features.Count(x => x.Active), classType.ConcurrencyToken);
+        new(classType.Id, classType.Name, classType.Description, classType.Fields.Count, classType.Actions.Count, classType.Features.Count(x => x.Active && !x.Feature.IsFieldFeature), classType.ConcurrencyToken);
 
     private async Task<ClassTypeDetailDto> MapDetailAsync(ClassType classType, CancellationToken token)
     {
@@ -240,13 +245,13 @@ public sealed class ClassWorkflowService(IClassTypeRepository classTypes, IClass
             [..classType.Fields.OrderBy(field => field.SortOrder).Select(MapField)],
             [..classType.Actions.Select(action => MapAction(action, classType))],
             [..allFeatures.Select(x => new ClassTypeFeatureDto(x.Id, x.Code, x.Name, 
-                classType.Features.FirstOrDefault(f => f.FeatureId == x.Id)?.Active ?? false))
-                .OrderByDescending(x => x.IsEnabled).ThenBy(x => x.Name)],
+                classType.Features.FirstOrDefault(f => f.FeatureId == x.Id)?.Active ?? false, x.IsFieldFeature))
+                .OrderBy(x => x.Id)],
             classType.ConcurrencyToken);
     }
 
     private static ClassFieldDto MapField(ClassField field) =>
-        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.IsHidden, field.DefaultValue, field.SortOrder, field.DependsOnClassFieldId, field.DependsOnClassFieldValue, [..field.Options?.OrderBy(x => x.SortOrder).Select(x => new FieldOptionsDto(x.Value, x.Caption)) ?? []]);
+        new(field.Id, field.Label, field.Field.FieldType, field.IsRequired, field.IsHidden, field.DefaultValue, field.SortOrder, field.DependsOnClassFieldId, field.DependsOnClassFieldValue, field.Feature.Code, [..field.Options?.OrderBy(x => x.SortOrder).Select(x => new FieldOptionsDto(x.Value, x.Caption)) ?? []]);
 
     private static ClassActionDto MapAction(ClassAction action, ClassType classType)
     {

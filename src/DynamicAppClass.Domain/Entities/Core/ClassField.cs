@@ -11,8 +11,10 @@ public sealed class ClassField : BaseEntity
     public bool IsHidden { get; set; }
     public int SortOrder { get; set; }
     public string? DefaultValue { get; set; }
+    public int FeatureId { get; set; }
 
     public string Label => OverrideName ?? Field.Name;
+    public Feature Feature { get; set; } = null!;
     public Field Field { get; set; } = null!;
     public ClassField? DependsOnClassField { get; set; }
     public List<ClassFieldLookup> Options { get; set; } = [];

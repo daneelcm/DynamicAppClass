@@ -32,6 +32,11 @@ import { RouterLink } from '@angular/router';
       <section class="config-grid">
         <form class="panel" [formGroup]="fieldForm" (ngSubmit)="addField()">
           <h2>Fields</h2>
+          <label><div>Fields Group<span class="required">*</span></div>
+            <select formControlName="featureCode">
+              @for (feat of classType.features.filter(x => x.isFieldFeature); track feat.id) { <option [value]="feat.code">{{ feat.name }} (Step {{ $index + 1 }})</option> }
+            </select>
+          </label>
           <label><div>Name<span class="required">*</span></div><input formControlName="name" /></label>
           <label><div>Type<span class="required">*</span></div>
             <select formControlName="fieldType">
@@ -123,7 +128,7 @@ import { RouterLink } from '@angular/router';
 
         <div class="panel">
           <h2>Features</h2>
-          @for (feat of classType.features; track feat.id) {
+          @for (feat of classType.features.filter(x => !x.isFieldFeature); track feat.id) {
             <label class="check" style="justify-content: space-between;">
               <span style="padding: 10px;"><input type="checkbox" (change)="featureEvent(feat.id, $event)" [checked]="feat.isEnabled" /> {{ feat.name }}</span>
               @if (feat.isEnabled){
@@ -148,6 +153,7 @@ export class ClassTypeDetailPage implements OnInit {
   id = 0;
 
   fieldForm = this.fb.nonNullable.group({
+    featureCode: ['', Validators.required],
     name: ['', Validators.required],
     fieldType: ['Text' as ClassFieldType, Validators.required],
     isRequired: [false],

@@ -7,7 +7,8 @@ import { ManageContactPartial } from "../partial-components/manage-contact";
 
 interface FeatureManagement {
   data: [],
-  isValid: boolean
+  isValid: boolean,
+  isFieldFeature: boolean
 }
 
 @Component({
@@ -33,8 +34,6 @@ interface FeatureManagement {
           </label>
           @if (selectedType) {
             <ul class="compact-list">
-              @if(currentStep == 'appData') { <li><strong>Application Data</strong></li> }
-              @else { <li>Application Data</li> }
               @for (feat of selectedType.features?.filter(x => x.isEnabled); track $index) {
                 @if(currentStep == feat.code) { <li><strong>{{ feat.name }}</strong></li> }
                 @else { <li>{{ feat.name }}</li> }
@@ -46,13 +45,13 @@ interface FeatureManagement {
 
         @if (selectedType) {
           <div style="display: grid; gap: 10px">
-            @if(currentStep == 'appData') {
+            @if(featuresInfo[currentStep].isFieldFeature) {
               <div formGroupName="fieldValues" class="panel dynamic-fields">
-                @for (field of selectedType.fields; track field.id) {
+                @for (field of selectedType.fields.filter(x => x.featureCode == currentStep); track field.id) {
                   @if (field.isHidden) {
                     <input type="hidden" [formControlName]="field.id" />
                   }
-                @else if ((field.dependsOnClassFieldId ?? 0) === 0 || form.get('fieldValues.' + field.dependsOnClassFieldId)?.value == field.dependsOnClassFieldValue) {
+                  @else if ((field.dependsOnClassFieldId ?? 0) === 0 || form.get('fieldValues.' + field.dependsOnClassFieldId)?.value == field.dependsOnClassFieldValue) {
                     <label><div>{{ field.name }}@if (field.isRequired) { <span class="required">*</span> }</div>
                       @if (field.fieldType === 'LongText') {
                         <textarea [formControlName]="field.id"></textarea>
@@ -87,12 +86,12 @@ interface FeatureManagement {
             }
 
             <div class="panel" style="display: flex; justify-content: end; gap:10px; align-items: flex-end;">
-              <button type="button" [disabled]="currentStep == 'appData'" (click)="currentStep = featureCodes[0] == currentStep ? 'appData' : featureCodes[featureCodes.indexOf(currentStep) - 1]"><- Back</button>
+              <button type="button" [disabled]="currentStep == featureCodes[0]" (click)="currentStep = featureCodes[featureCodes.indexOf(currentStep) - 1]"><- Back</button>
               @if (featureCodes[featureCodes.length - 1] == currentStep) {
-                <button type="submit" [disabled]="(currentStep == 'appData' && form.invalid) || (currentStep != 'appData' && !(featuresInfo[currentStep].isValid))">Submit</button>
+                <button type="submit" [disabled]="!isCurrentSteValid()">Submit</button>
               }
               @else {
-                <button type="button" [disabled]="(currentStep == 'appData' && form.invalid) || (currentStep != 'appData' && !(featuresInfo[currentStep].isValid))"
+                <button type="button" [disabled]="!isCurrentSteValid()"
                   (click)="currentStep = featureCodes[featureCodes.indexOf(currentStep) + 1]">Next -></button>
               }
             </div>
@@ -100,7 +99,7 @@ interface FeatureManagement {
         }
         @else {
           <div class="panel">
-            <h2>Open Items</h2>
+            <h2>Applications Process</h2>
             <div class="table-list">
               @for (instance of instances; track instance.id) {
                 <a class="row-link" [routerLink]="['/instances', instance.id]">
@@ -111,7 +110,7 @@ interface FeatureManagement {
                   <span class="status-pill">{{ instance.currentStatusName }}</span>
                 </a>
               } @empty {
-                <p>{{ error || 'No instances yet.' }}</p>
+                <p>{{ error || 'No applications yet.' }}</p>
               }
             </div>
           </div>
@@ -130,14 +129,14 @@ export class ClassInstancesList implements OnInit {
   selectedType?: ClassTypeDetail;
   featureCodes: string[] = [];
   featuresInfo: Record<string, FeatureManagement> = {};
-  currentStep = 'appData';
+  currentStep = '';
   error = '';
-
+  
   form = this.fb.group({
     classTypeId: [0, Validators.required],
     fieldValues: this.fb.group({})
   });
-
+  
   ngOnInit() {
     this.api.listClassTypes().subscribe({
       next: types => {
@@ -151,6 +150,14 @@ export class ClassInstancesList implements OnInit {
     });
     this.loadInstances();
   }
+  
+  isCurrentSteValid() {
+    if (!this.featuresInfo[this.currentStep].isFieldFeature)
+      return this.featuresInfo[this.currentStep].isValid;
+    else
+      return this.selectedType?.fields.filter(x => x.featureCode == this.currentStep)
+        .every(x => this.form.get(`fieldValues.${x.id}`)?.valid);
+  }
 
   selectType() {
     const id = this.form.controls.classTypeId.value;
@@ -163,6 +170,7 @@ export class ClassInstancesList implements OnInit {
     this.api.getClassType(id).subscribe({
       next: type => {
         this.selectedType = type;
+        this.currentStep = type.features[0].code;
         this.error = '';
         const controls: Record<string, FormControl<string | null>> = {};
         for (const field of type.fields) {
@@ -188,7 +196,7 @@ export class ClassInstancesList implements OnInit {
         
         for (const feat of type.features.filter(x => x.isEnabled)){
           this.featureCodes.push(feat.code);
-          this.featuresInfo[feat.code] = { data: [], isValid: false };
+          this.featuresInfo[feat.code] = { data: [], isValid: false, isFieldFeature: feat.isFieldFeature };
         }
         this.cdr.detectChanges();
       },

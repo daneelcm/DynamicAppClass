@@ -44,6 +44,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasOne(field => field.Field).WithMany().HasForeignKey(field => field.FieldId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(field => field.DependsOnClassField).WithMany().HasForeignKey(field => field.DependsOnClassFieldId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(field => field.Options).WithOne().HasForeignKey(option => option.ClassFieldId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(field => field.Feature).WithMany().HasForeignKey(field => field.FeatureId).OnDelete(DeleteBehavior.Restrict);
             entity.Ignore(field => field.Label);
         });
 
