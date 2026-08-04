@@ -47,6 +47,7 @@ interface FeatureManagement {
           <div style="display: grid; gap: 10px">
             @if(featuresInfo[currentStep].isFieldFeature) {
               <div formGroupName="fieldValues" class="panel dynamic-fields">
+                <h2>{{selectedType.features.find(x => x.code == currentStep)?.name}}</h2>
                 @for (field of selectedType.fields.filter(x => x.featureCode == currentStep); track field.id) {
                   @if (field.isHidden) {
                     <input type="hidden" [formControlName]="field.id" />

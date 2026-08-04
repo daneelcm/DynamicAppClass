@@ -20,9 +20,6 @@ public static class SeedData
         var featContacts = new Feature { Name = "Contacts", Code = "contacts" };
         var featDocuments = new Feature { Name = "Documents", Code = "documents" };
 
-        //dbContext.Features.AddRange([featGeneral, featDetails, featAddress, featContacts, featDocuments]);
-        //dbContext.SaveChanges();
-
         var clx = new ClassType { Name = "CLIV", Description = "Class IV Application Process example." };
 
         var lookupPending = new Lookup { Value = "1", Caption = "Pending", SortOrder = 10 };
@@ -39,7 +36,7 @@ public static class SeedData
         };
         
         var titleField = new ClassField { Field = new Field { Name = "Title", FieldType = ClassFieldType.Text },
-            IsRequired = true, SortOrder = 1, Feature = featGeneral };
+            IsRequired = true, SortOrder = 1, DefaultValue = "CLIV-202600", Feature = featGeneral };
         var govProjField = new ClassField { Field = new Field { Name = "Is this a Government Project?", FieldType = ClassFieldType.Boolean },
             IsRequired = true, SortOrder = 2, Feature = featGeneral };
 
@@ -130,7 +127,7 @@ public static class SeedData
         ]);
 
         dbContext.AllowedContacts.AddRange([
-            new AllowedContact { ClassType = clx, ContactTypeValue = "1", ContactTypeCaption = "Aplicant", QuantityAllowed = 1, Required = true, QuantityRequired = 1, CanBeEntity = true, RequirePhone = true, RequireEmail = true, RequireAddress = true, RequireLicense = false },
+            new AllowedContact { ClassType = clx, ContactTypeValue = "1", ContactTypeCaption = "Applicant", QuantityAllowed = 1, Required = true, QuantityRequired = 1, CanBeEntity = true, RequirePhone = true, RequireEmail = true, RequireAddress = true, RequireLicense = false },
             new AllowedContact { ClassType = clx, ContactTypeValue = "2", ContactTypeCaption = "Property Owner", QuantityAllowed = 3, Required = true, QuantityRequired = 1, CanBeEntity = true, RequirePhone = false, RequireEmail = false, RequireAddress = true, RequireLicense = false },
             new AllowedContact { ClassType = clx, ContactTypeValue = "3", ContactTypeCaption = "Contractor", QuantityAllowed = 1, Required = false, QuantityRequired = 0, CanBeEntity = true, RequirePhone = true, RequireEmail = false, RequireAddress = true, RequireLicense = true }
         ]);
